@@ -1,0 +1,21 @@
+{
+  "name": "compose-toggler",
+  "version": "1.0.0",
+  "description": "Easily toggle elements visibility or classnames from click or change events",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.github.com/compose-ui/toggler"
+  },
+  "keywords": [
+    "toggle"
+  ],
+  "author": "Brandon Mathis",
+  "license": "MIT",
+  "dependencies": {
+    "compose-event": "^1.0.0"
+  }
+}
