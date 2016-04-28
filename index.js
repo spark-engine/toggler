@@ -6,7 +6,7 @@ var Toggler = {
   selectSelector: "option[data-show]",
 
   listen: function(){
-    event.on(document, "click", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", Toggler.trigger)
+    event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", Toggler.trigger)
     event.on(document, "change", ".select-toggler", Toggler.trigger)
   },
 
