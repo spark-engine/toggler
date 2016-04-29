@@ -108,6 +108,10 @@ describe('Toggler', function(){
     before(function(){
       setTemplate('checkbox')
     })
+    it('initializes visibility matching default checked state', function(){
+      assert.isTrue($('.hide').checked)
+      assert.isTrue(!visible($('.menu')))
+    })
 
     it('matches data-toggle state with visibility', function(){
       assert.equal(checkInput($('.toggler')),   visible($('.menu')))
@@ -145,6 +149,13 @@ describe('Toggler', function(){
   describe('radio buttons', function(){
     before(function(){
       setTemplate('radio')
+    })
+
+    it('initializes visibility matching default checked state', function(){
+      assert.isTrue($('.two').checked)
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
     })
 
     it('ignores inputs outside of the form', function(){
@@ -186,6 +197,13 @@ describe('Toggler', function(){
   describe('select input', function(){
     before(function(){
       setTemplate('select')
+    })
+
+    it('initializes visibility matching default selected option', function(){
+      assert.isTrue($('.select-toggle').selectedIndex == 2)
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
     })
 
     it('should hide all panels when none is selected', function(){

@@ -17,15 +17,18 @@ var Toggler = {
   },
 
   trigger: function(event) {
-    var target = event.currentTarget
-    var actions = ['hide', 'toggle', 'show', 'removeClass', 'toggleClass', 'addClass']
-    var select
-
     // Stop event and bubbling if link is only being used as a toggler
-    if (target.getAttribute('href') == "#") {
+    if (event.currentTarget.getAttribute('href') == "#") {
       event.preventDefault()
       event.stop()
     } 
+
+    Toggler.triggerToggling(event.currentTarget)
+  },
+
+  triggerToggling: function(target) {
+    var actions = ['hide', 'toggle', 'show', 'removeClass', 'toggleClass', 'addClass']
+    var select
 
     // Store the select, and set the target to the current option
     // Events fire on the select, but the options have toggling attributes
@@ -201,7 +204,7 @@ var Toggler = {
   toggleCheckboxes: function(checkboxes) {
     checkboxes = checkboxes || document.querySelectorAll(Toggler.checkboxSelector)
 
-    Array.prototype.forEach.call(checkboxes, Toggler.dispatch)
+    Array.prototype.forEach.call(checkboxes, Toggler.triggerToggling)
   },
 
   setupRadios: function() {
@@ -228,7 +231,10 @@ var Toggler = {
 
           r.dataset.togglerActive = true
         })
+
       }
+      if(radio.checked)
+        Toggler.triggerToggling(radio)
     })
   },
 
@@ -260,7 +266,7 @@ var Toggler = {
 
         // Ensure that currently selected option is toggled properly
         //
-        Toggler.dispatch(select)
+        Toggler.triggerToggling(select)
       }
     })
   },
@@ -297,14 +303,6 @@ var Toggler = {
       return el.dataset[attr]
     }).filter(function(selectors, index, self) {
       return selectors != "" && typeof selectors != 'undefined' && self.indexOf(selectors) === index
-    })
-  },
-
-  toggleSelects: function(selects) {
-    var selects = selects || 'option[data-show]'
-
-    Array.prototype.forEach.call(document.querySelectorAll(radios), function(radio) {
-      Toggler.setState(radio.dataset.show, radio.checked)
     })
   }
 }
