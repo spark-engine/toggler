@@ -18,36 +18,49 @@ var Toggler = {
 
   trigger: function(event) {
     var target = event.currentTarget
+    var actions = ['hide', 'toggle', 'show', 'removeClass', 'toggleClass', 'addClass']
+    var select
 
-    if (target.tagName.toLowerCase() == 'a' && target.getAttribute('href') == "#") {
+    // Stop event and bubbling if link is only being used as a toggler
+    if (target.getAttribute('href') == "#") {
       event.preventDefault()
       event.stop()
     } 
 
-    if (target.type == 'radio') {
-      Toggler.toggleRadio(target)
-    } else if (target.type == 'checkbox') {
-      Toggler.toggleCheckbox(target)
-    } else if (target.tagName.toLowerCase() == 'select') {
-      Toggler.toggleSelect(target)
-    } else {
-      Toggler.dispatch(target, 'hide')
-      Toggler.dispatch(target, 'toggle')
-      Toggler.dispatch(target, 'show')
-      Toggler.dispatch(target, 'removeClass')
-      Toggler.dispatch(target, 'toggleClass')
-      Toggler.dispatch(target, 'addClass')
+    // Store the select, and set the target to the current option
+    // Events fire on the select, but the options have toggling attributes
+    if (target.tagName.match(/select/i)) {
+      select = target
+      target = target.selectedOptions[0]
     }
+
+    // Radio inputs and selects do not support toggling, so remove them
+    if (select || target.type == 'radio') {
+      actions = actions.filter(function(action) {
+        return !action.match(/toggle/)
+      })
+    }
+
+    // Dispatch all actions
+    actions.forEach(function(action) {
+      Toggler.dispatch(target, action)
+    })
+
+    // Support data-add-class on selects (targets currently selected item
+    if (select) 
+      Toggler.dispatch(select, 'addClass')
   },
 
-  dispatch: function(el, type, force) {
-    var action
+  dispatch: function(el, type) {
+    var action = type
     var data = el.dataset[type]
 
-    if (typeof force != 'undefined')
-      action = force
-    else
-      action = type
+    // Abort if element doesn't have data for the action
+    if (typeof data == 'undefined' || data == '') return
+
+    // Toggle and show are treated the same for checkboxes
+    if (el.type == 'checkbox')
+      action = (type.match(/hide|remove/i) ? !el.checked : el.checked)
 
     if (data){
       if (type.match(/class/i)){
@@ -144,7 +157,6 @@ var Toggler = {
     }
 
     return action
-
   },
 
   show: function(el) {
@@ -186,38 +198,10 @@ var Toggler = {
     })
   },
 
-  toggleCheckbox: function(checkbox) {
-    // Visibility toggling
-    Toggler.dispatch(checkbox, 'hide', !checkbox.checked)
-    Toggler.dispatch(checkbox, 'toggle')
-    Toggler.dispatch(checkbox, 'show', checkbox.checked)
-
-    // Class toggling
-    Toggler.dispatch(checkbox, 'removeClass', !checkbox.checked)
-    Toggler.dispatch(checkbox, 'toggleClass')
-    Toggler.dispatch(checkbox, 'addClass', checkbox.checked)
-  },
-
-  toggleSelect: function(select) {
-    var option = select.selectedOptions[0]
-    Toggler.dispatch(option, 'hide')
-    Toggler.dispatch(option, 'show')
-    Toggler.dispatch(option, 'removeClass')
-    Toggler.dispatch(option, 'addClass')
-    Toggler.dispatch(select, 'addClass')
-  },
-
-  toggleRadio: function(radio) {
-    Toggler.dispatch(radio, 'hide')
-    Toggler.dispatch(radio, 'show')
-    Toggler.dispatch(radio, 'removeClass')
-    Toggler.dispatch(radio, 'addClass')
-  },
-
   toggleCheckboxes: function(checkboxes) {
     checkboxes = checkboxes || document.querySelectorAll(Toggler.checkboxSelector)
 
-    Array.prototype.forEach.call(checkboxes, Toggler.toggleCheckbox)
+    Array.prototype.forEach.call(checkboxes, Toggler.dispatch)
   },
 
   setupRadios: function() {
@@ -276,7 +260,7 @@ var Toggler = {
 
         // Ensure that currently selected option is toggled properly
         //
-        Toggler.toggleSelect(select)
+        Toggler.dispatch(select)
       }
     })
   },

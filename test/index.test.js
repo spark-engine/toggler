@@ -149,9 +149,9 @@ describe('Toggler', function(){
 
     it('hides all when none is selected', function(){
       checkInput($('.none'))
-      assert.isFalse(visible($('.panel-one')))
-      assert.isFalse(visible($('.panel-two')))
-      assert.isFalse(visible($('.panel-three')))
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
     })
 
     it('shows only the first when one is selected', function(){
