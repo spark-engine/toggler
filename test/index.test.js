@@ -4,6 +4,7 @@ var assert = require('chai').assert
 var toggler = require('../')
 var domify = require('domify')
 var event = require('compose-event')
+var $ = function(str) { return document.querySelector(str) }
 
 var templates = {
   click: fs.readFileSync(__dirname + '/templates/click.html', 'utf8'),
@@ -34,7 +35,7 @@ var visible = function(element) {
 }
 
 var setTemplate = function(name) {
-  var previousTest = document.querySelector('.test-template')
+  var previousTest = $('.test-template')
   if (previousTest) document.body.removeChild(previousTest)
 
   var template = "<div class='test-template'>" + templates[name] + "</div>"
@@ -49,132 +50,163 @@ describe('Toggler', function(){
   })
 
   describe('click', function(){
-    it('changes visibility', function(){
+    before(function(){
       setTemplate('click')
-      var menu = document.querySelector('.menu')
-      var toggleEl = document.querySelector('.toggler')
+    })
 
-      // Hide with a data-toggle
+    it('hides and shows with a click on a data-toggle', function(){
+      var menu = $('.menu')
+      var toggleEl = $('.toggler')
+
       event.fire(toggleEl, 'click')
-      assert.equal(visible(menu), false)
+      assert.isTrue(!visible(menu))
 
-      // Show with a data-toggle
       event.fire(toggleEl, 'click')
-      assert.equal(visible(menu), true)
+      assert.isTrue(visible(menu))
+    })
 
-      // Hide with a data-hide
-      event.fire(document.querySelector('.hide'), 'click')
-      assert.equal(visible(menu), false)
+    it('hides with click data-hide', function(){
+      event.fire($('.hide'), 'click')
+      assert.isFalse(visible($('.menu')))
+    })
 
-      // Hide with a data-show
-      event.fire(document.querySelector('.show'), 'click')
-      assert.equal(visible(menu), true)
+    it('shows with click data-show', function(){
+      event.fire($('.show'), 'click')
+      assert.isTrue(visible($('.menu')))
+    })
+
+    // Classname toggling
+    //
+    it('toggles its own classnames when clicking a data-toggle-class', function(){
+      event.fire($('.menu'), 'click')
+      assert.isTrue($('.menu').classList.contains('active'))
+
+      event.fire($('.menu'), 'click')
+      assert.isTrue(!$('.menu').classList.contains('active'))
+    })
+
+    it('toggles target element classnames when clicking a data-toggle-class', function(){
+      event.fire($('.toggle-class'), 'click')
+      assert.isTrue($('.menu').classList.contains('active'))
+
+      event.fire($('.toggle-class'), 'click')
+      assert.isTrue(!$('.menu').classList.contains('active'))
+    })
+
+    it('removes class names when clicking a data-toggle-class', function(){
+      event.fire($('.remove'), 'click')
+      assert.isTrue(!$('.menu').classList.contains('active'))
+    })
+
+    it('adds class names when clicking a data-toggle-class', function(){
+      event.fire($('.add'), 'click')
+      assert.isTrue($('.menu').classList.contains('active'))
     })
   })
 
-  describe('checkboxes', function(){
-    it('match check state to visiblity', function(){
+  describe('checkbox', function(){
+    before(function(){
       setTemplate('checkbox')
-      var toggleBox = document.querySelector('.toggler')
-      var hideBox = document.querySelector('.hide')
-      var showBox = document.querySelector('.show')
-      var menu = document.querySelector('.menu')
+    })
 
-      // Check state on data-toggle is linked with visibility
-      //
-      assert.equal(checkInput(toggleBox),   visible(menu))
-      assert.equal(uncheckInput(toggleBox), visible(menu))
+    it('matches data-toggle state with visibility', function(){
+      assert.equal(checkInput($('.toggler')),   visible($('.menu')))
+      assert.equal(uncheckInput($('.toggler')), visible($('.menu')))
+    })
 
-      // Check state on data-show is linked with visibility
-      assert.equal(checkInput(showBox),     visible(menu))
-      assert.equal(uncheckInput(showBox),   visible(menu))
+    it('matches data-show state with visibility', function(){
+      assert.equal(checkInput($('.show')),     visible($('.menu')))
+      assert.equal(uncheckInput($('.show')),   visible($('.menu')))
+    })
 
-      // Check state on data-hide is opposite with visibility
-      //
-      assert.equal(checkInput(hideBox),     !visible(menu))
-      assert.equal(uncheckInput(hideBox),   !visible(menu))
+    it('inverts data-hide state with visibility', function(){
+      assert.equal(checkInput($('.hide')),     !visible($('.menu')))
+      assert.equal(uncheckInput($('.hide')),   !visible($('.menu')))
+    })
+
+    // Classname toggling
+    //
+    it('matches data-toggle-class state with active classname', function(){
+      assert.equal(checkInput($('.toggle-class')),   $('.menu').classList.contains('active'))
+      assert.equal(uncheckInput($('.toggle-class')), $('.menu').classList.contains('active'))
+    })
+
+    it('matches data-add-class state with active classname', function(){
+      assert.equal(checkInput($('.add')),   $('.menu').classList.contains('active'))
+      assert.equal(uncheckInput($('.add')), $('.menu').classList.contains('active'))
+    })
+
+    it('inverts data-remove-class state with active classname', function(){
+      assert.equal(checkInput($('.remove')),   !$('.menu').classList.contains('active'))
+      assert.equal(uncheckInput($('.remove')), !$('.menu').classList.contains('active'))
     })
   })
 
   describe('radio buttons', function(){
-    it('match visibility to selected option', function(){
+    before(function(){
       setTemplate('radio')
+    })
 
-      var none = document.querySelector('.none')
-      var one = document.querySelector('.one')
-      var two = document.querySelector('.two')
-      var three = document.querySelector('.three')
+    it('hides all when none is selected', function(){
+      checkInput($('.none'))
+      assert.isFalse(visible($('.panel-one')))
+      assert.isFalse(visible($('.panel-two')))
+      assert.isFalse(visible($('.panel-three')))
+    })
 
-      var panelOne = document.querySelector('.panel-one')
-      var panelTwo = document.querySelector('.panel-two')
-      var panelThree = document.querySelector('.panel-three')
+    it('shows only the first when one is selected', function(){
+      checkInput($('.one'))
+      assert.isTrue(visible($('.panel-one')))
+      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
+    })
 
-      // Checking the None option should hide all other options
-      //
-      checkInput(none)
-      assert.isFalse(visible(panelOne))
-      assert.isFalse(visible(panelTwo))
-      assert.isFalse(visible(panelThree))
+    it('shows only the second when two is selected', function(){
+      checkInput($('.two'))
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
+    })
 
-      // Checking the first option should hide all other options
-      //
-      assert.equal(checkInput(one), visible(panelOne))
-      assert.isFalse(visible(panelTwo))
-      assert.isFalse(visible(panelThree))
-
-
-      // Checking the second option should hide all other options
-      //
-      assert.equal(checkInput(two), visible(panelTwo))
-      assert.isFalse(visible(panelOne))
-      assert.isFalse(visible(panelThree))
-
-
-      // Checking the thrid option should hide all other options
-      //
-      assert.equal(checkInput(three), visible(panelThree))
-      assert.isFalse(visible(panelOne))
-      assert.isFalse(visible(panelTwo))
+    it('shows only the third when three is selected', function(){
+      checkInput($('.three'))
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(visible($('.panel-three')))
     })
   })
 
   describe('select input', function(){
-    it('should match visibility to selected option', function(){
+    before(function(){
       setTemplate('select')
+    })
 
-      var select = document.querySelector('select')
+    it('should hide all panels when none is selected', function(){
+      selectIndex($('.select-toggle'), 0)
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
+    })
 
-      var panelOne = document.querySelector('.panel-one')
-      var panelTwo = document.querySelector('.panel-two')
-      var panelThree = document.querySelector('.panel-three')
+    it('should show panel one and hide panels two and three when one is selected', function(){
+      selectIndex($('.select-toggle'), 1)
+      assert.isTrue(visible($('.panel-one')))
+      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
+    })
 
-      // Selecting the None option should hide all other options
-      //
-      selectIndex(select, 0)
-      assert.isTrue(!visible(panelOne))
-      assert.isTrue(!visible(panelTwo))
-      assert.isTrue(!visible(panelThree))
+    it('should show panel two and hide panels one and three when two is selected', function(){
+      selectIndex($('.select-toggle'), 2)
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-three')))
+    })
 
-      // Selecting the first option should hide all other options
-      //
-      selectIndex(select, 1)
-      assert.isTrue(visible(panelOne))
-      assert.isTrue(!visible(panelTwo))
-      assert.isTrue(!visible(panelThree))
-
-      // Selecting the second option should hide all other options
-      //
-      selectIndex(select, 2)
-      assert.isTrue(!visible(panelOne))
-      assert.isTrue(visible(panelTwo))
-      assert.isTrue(!visible(panelThree))
-
-      // Selecting the thrid option should hide all other options
-      //
-      selectIndex(select, 3)
-      assert.isTrue(!visible(panelOne))
-      assert.isTrue(!visible(panelTwo))
-      assert.isTrue(visible(panelThree))
+    it('should show panel three and hide panels one and two when three is selected', function(){
+      selectIndex($('.select-toggle'), 3)
+      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(visible($('.panel-three')))
     })
   })
 })

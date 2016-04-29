@@ -11,7 +11,6 @@ var Toggler = {
   },
 
   refresh: function(){
-    Toggler.toggleRadios()
     Toggler.toggleCheckboxes()
     Toggler.setupSelects()
     Toggler.setupRadios()
@@ -26,8 +25,7 @@ var Toggler = {
     } 
 
     if (target.type == 'radio') {
-      Toggler.toggleRadios(document.querySelectorAll('input[name="'+ target.name +'"]'))
-      Toggler.dispatch(target, 'addClass')
+      Toggler.toggleRadio(target)
     } else if (target.type == 'checkbox') {
       Toggler.toggleCheckbox(target)
     } else if (target.tagName.toLowerCase() == 'select') {
@@ -43,13 +41,19 @@ var Toggler = {
   },
 
   dispatch: function(el, type, force) {
-    var dispatchedElements
+    var action
+    var data = el.dataset[type]
 
-    if (el.dataset[type]){
+    if (typeof force != 'undefined')
+      action = force
+    else
+      action = type
+
+    if (data){
       if (type.match(/class/i)){
-        Toggler.setClass(el.dataset[type], type, el)
+        Toggler.setClass(data, action, el)
       } else {
-        Toggler.setState(el.dataset[type], type)
+        Toggler.setState(data, action)
       }
     }
   },
@@ -65,6 +69,8 @@ var Toggler = {
   //
 
   setClass: function (selectors, action, el){
+    if(typeof selectors == 'undefined' || selectors == '') return
+
     if (typeof(action) == 'boolean') {
       action = (action ? 'add' : 'remove')
     }
@@ -78,6 +84,26 @@ var Toggler = {
     // If no slectors are present, use the current el for classnames
     if (selectors) {
       matches = document.querySelectorAll(selectors)
+    } else if (el.tagName.match(/select|input/i)) {
+
+      // Retrieve dataset from selected option
+      if (el.tagName.match(/select/i))
+        el = el.selectedOptions[0]
+
+      var showSelectors = el.dataset.show
+      var hideSelectors = el.dataset.hide
+
+      // Add classname to shown element
+      if(hideSelectors) {
+        Toggler.setClass(classnames + ';' + hideSelectors, 'remove', el)
+      }
+
+      // Remove classname from shown element
+      if(showSelectors) {
+        Toggler.setClass(classnames + ';' + showSelectors, 'add', el)
+      }
+
+      return
     } else {
       matches = [el]
     }
@@ -92,6 +118,7 @@ var Toggler = {
   },
 
   setState: function(selectors, state) {
+    if(typeof selectors == 'undefined' || selectors == '') return
     var matches = document.querySelectorAll(selectors)
 
     Array.prototype.forEach.call(matches, function(match){
@@ -159,53 +186,32 @@ var Toggler = {
     })
   },
 
-  toggleRadios: function(radios) {
-    radios = radios || document.querySelectorAll('input[type=radio][data-show], input[type=radio][data-add-class]')
-
-    var checked = []
-    var process = function(radio) {
-      if (radio.dataset.show)
-        Toggler.setState(radio.dataset.show, radio.checked)
-
-      if (radio.dataset.addClass)
-        Toggler.setClass(radio.dataset.addClass, radio.checked)
-    }
-
-    Array.prototype.forEach.call(radios, function(radio){
-      if (radio.checked) {
-        checked.push(radio)
-      } else {
-        process(radio)
-      }
-    })
-
-    Array.prototype.forEach.call(checked, process)
-  },
-
   toggleCheckbox: function(checkbox) {
     // Visibility toggling
-    if (checkbox.dataset.hide)
-      Toggler.setState(checkbox.dataset.hide, !checkbox.checked)
-    if (checkbox.dataset.toggle)
-      Toggler.setState(checkbox.dataset.toggle, 'toggle')
-    if (checkbox.dataset.show)
-      Toggler.setState(checkbox.dataset.show, checkbox.checked)
+    Toggler.dispatch(checkbox, 'hide', !checkbox.checked)
+    Toggler.dispatch(checkbox, 'toggle')
+    Toggler.dispatch(checkbox, 'show', checkbox.checked)
 
     // Class toggling
-    if (checkbox.dataset.removeClass)
-      Toggler.setClass(checkbox.dataset.removeClass, !checkbox.checked, checkbox)
-    if (checkbox.dataset.toggleClass)
-      Toggler.setClass(checkbox.dataset.toggleClass, 'toggle', checkbox)
-    if (checkbox.dataset.addClass)
-      Toggler.setClass(checkbox.dataset.addClass, checkbox.checked, checkbox)
+    Toggler.dispatch(checkbox, 'removeClass', !checkbox.checked)
+    Toggler.dispatch(checkbox, 'toggleClass')
+    Toggler.dispatch(checkbox, 'addClass', checkbox.checked)
   },
 
   toggleSelect: function(select) {
     var option = select.selectedOptions[0]
     Toggler.dispatch(option, 'hide')
     Toggler.dispatch(option, 'show')
-    Toggler.dispatch(option, 'addClass')
     Toggler.dispatch(option, 'removeClass')
+    Toggler.dispatch(option, 'addClass')
+    Toggler.dispatch(select, 'addClass')
+  },
+
+  toggleRadio: function(radio) {
+    Toggler.dispatch(radio, 'hide')
+    Toggler.dispatch(radio, 'show')
+    Toggler.dispatch(radio, 'removeClass')
+    Toggler.dispatch(radio, 'addClass')
   },
 
   toggleCheckboxes: function(checkboxes) {
@@ -216,22 +222,25 @@ var Toggler = {
 
   setupRadios: function() {
     Array.prototype.forEach.call(document.querySelectorAll(Toggler.radioSelector), function(radio){
-      if (radio.dataset.togglerActive != true) {
+      if (!radio.dataset.togglerActive) {
         var radioName = radio.getAttribute('name')
         var siblings = Toggler.parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]')
+        var selectors = Toggler.dataAttributes(siblings, 'show')
 
         Array.prototype.forEach.call(siblings, function(r){
           // Ensure that all radio buttons in a group have a default data-show value of ''
           // This means that unset data-show values are toggle off everything
           //
-          if (radio.dataset.show)
-            r.dataset.show = r.dataset.show || ''
-         
+          r.dataset.show = r.dataset.show || ''
+
+          r.dataset.hide = selectors.filter(function(selector){
+            return r.dataset.show != selector
+          }).join(',')
+
           // Ensure that all radio buttons in a group have a default data-add-class value of ''
           // This means that unset data-add-class values are toggle off all classes
           //
-          if (radio.dataset.addClass)
-            r.dataset.addClass = r.dataset.addClass || ''
+          r.dataset.addClass = r.dataset.addClass || ''
 
           r.dataset.togglerActive = true
         })
@@ -248,16 +257,20 @@ var Toggler = {
       if (!option.dataset.togglerActive) {
 
         option.dataset.show = option.dataset.show || ''
+
         var select = Toggler.getSelectFromOption(option)
         select.classList.add('select-toggler')
         var options = select.querySelectorAll('option')
-        var selectors = Toggler.showAttributes(options)
+
+        var selectors = Toggler.dataAttributes(options, 'show')
 
         Array.prototype.forEach.call(options, function(o) {
           o.dataset.show = o.dataset.show || ''
+
           o.dataset.hide = selectors.filter(function(selector){
             return (o.dataset.show != selector)
           }).join(',')
+
           o.dataset.togglerActive = true
         })
 
@@ -293,13 +306,13 @@ var Toggler = {
     return el || document
   },
 
-  // Return an array of all data-show values from elements
+  // Return a unique array of all data attribute values from elements
   //
-  showAttributes: function(elements) {
+  dataAttributes: function(elements, attr) {
     return Array.prototype.map.call(elements, function(el) { 
-      return el.dataset.show
-    }).filter(function(selectors) {
-      return selectors != "" && typeof selectors != 'undefined'
+      return el.dataset[attr]
+    }).filter(function(selectors, index, self) {
+      return selectors != "" && typeof selectors != 'undefined' && self.indexOf(selectors) === index
     })
   },
 
