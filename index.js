@@ -247,17 +247,18 @@ var Toggler = {
       // Prevent an option from being considered twice
       if (!option.dataset.togglerActive) {
 
+        option.dataset.show = option.dataset.show || ''
         var select = Toggler.getSelectFromOption(option)
         select.classList.add('select-toggler')
         var options = select.querySelectorAll('option')
         var selectors = Toggler.showAttributes(options)
 
         Array.prototype.forEach.call(options, function(o) {
-          option.dataset.show = ''
-          option.dataset.hide = selectors.filter(function(selector){
-            return option.dataset.show != selector && selector != ""
+          o.dataset.show = o.dataset.show || ''
+          o.dataset.hide = selectors.filter(function(selector){
+            return (o.dataset.show != selector)
           }).join(',')
-          option.dataset.togglerActive = true
+          o.dataset.togglerActive = true
         })
 
         // Ensure that currently selected option is toggled properly
@@ -297,6 +298,8 @@ var Toggler = {
   showAttributes: function(elements) {
     return Array.prototype.map.call(elements, function(el) { 
       return el.dataset.show
+    }).filter(function(selectors) {
+      return selectors != "" && typeof selectors != 'undefined'
     })
   },
 

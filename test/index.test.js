@@ -8,7 +8,8 @@ var event = require('compose-event')
 var templates = {
   click: fs.readFileSync(__dirname + '/templates/click.html', 'utf8'),
   checkbox: fs.readFileSync(__dirname + '/templates/checkbox.html', 'utf8'),
-  radio: fs.readFileSync(__dirname + '/templates/radio.html', 'utf8')
+  radio: fs.readFileSync(__dirname + '/templates/radio.html', 'utf8'),
+  select: fs.readFileSync(__dirname + '/templates/select.html', 'utf8')
 }
 
 var checkInput = function(input) {
@@ -21,6 +22,11 @@ var uncheckInput = function(input) {
   input.checked = false
   event.fire(input, 'change')
   return input.checked
+}
+
+var selectIndex = function(input, index) {
+  input.selectedIndex = index
+  event.fire(input, 'change')
 }
 
 var visible = function(element) {
@@ -94,6 +100,7 @@ describe('Toggler', function(){
     it('match visibility to selected option', function(){
       setTemplate('radio')
 
+      var none = document.querySelector('.none')
       var one = document.querySelector('.one')
       var two = document.querySelector('.two')
       var three = document.querySelector('.three')
@@ -101,6 +108,13 @@ describe('Toggler', function(){
       var panelOne = document.querySelector('.panel-one')
       var panelTwo = document.querySelector('.panel-two')
       var panelThree = document.querySelector('.panel-three')
+
+      // Checking the None option should hide all other options
+      //
+      checkInput(none)
+      assert.isFalse(visible(panelOne))
+      assert.isFalse(visible(panelTwo))
+      assert.isFalse(visible(panelThree))
 
       // Checking the first option should hide all other options
       //
@@ -121,6 +135,46 @@ describe('Toggler', function(){
       assert.equal(checkInput(three), visible(panelThree))
       assert.isFalse(visible(panelOne))
       assert.isFalse(visible(panelTwo))
+    })
+  })
+
+  describe('select input', function(){
+    it('should match visibility to selected option', function(){
+      setTemplate('select')
+
+      var select = document.querySelector('select')
+
+      var panelOne = document.querySelector('.panel-one')
+      var panelTwo = document.querySelector('.panel-two')
+      var panelThree = document.querySelector('.panel-three')
+
+      // Selecting the None option should hide all other options
+      //
+      selectIndex(select, 0)
+      assert.isTrue(!visible(panelOne))
+      assert.isTrue(!visible(panelTwo))
+      assert.isTrue(!visible(panelThree))
+
+      // Selecting the first option should hide all other options
+      //
+      selectIndex(select, 1)
+      assert.isTrue(visible(panelOne))
+      assert.isTrue(!visible(panelTwo))
+      assert.isTrue(!visible(panelThree))
+
+      // Selecting the second option should hide all other options
+      //
+      selectIndex(select, 2)
+      assert.isTrue(!visible(panelOne))
+      assert.isTrue(visible(panelTwo))
+      assert.isTrue(!visible(panelThree))
+
+      // Selecting the thrid option should hide all other options
+      //
+      selectIndex(select, 3)
+      assert.isTrue(!visible(panelOne))
+      assert.isTrue(!visible(panelTwo))
+      assert.isTrue(visible(panelThree))
     })
   })
 })
