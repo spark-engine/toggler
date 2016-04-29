@@ -147,6 +147,13 @@ describe('Toggler', function(){
       setTemplate('radio')
     })
 
+    it('ignores inputs outside of the form', function(){
+      // This other radio button is outside of the form
+      // if it has a data-show property, radio buttons 
+      // are not being scoped to their form.
+      assert.isUndefined($('.other-radio').dataset.show)
+    })
+
     it('hides all when none is selected', function(){
       checkInput($('.none'))
       assert.isTrue(!visible($('.panel-one')))
