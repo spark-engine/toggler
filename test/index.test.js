@@ -267,6 +267,11 @@ describe('Toggler', function(){
       assert.isTrue(!$('.panels').classList.contains('one'))
       assert.isTrue(!$('.panels').classList.contains('two'))
       assert.isTrue(!$('.panels').classList.contains('three'))
+
+      assert.isTrue($('.select-toggle').classList.contains('none'))
+      assert.isTrue(!$('.select-toggle').classList.contains('one'))
+      assert.isTrue(!$('.select-toggle').classList.contains('two'))
+      assert.isTrue(!$('.select-toggle').classList.contains('three'))
     })
 
     it('should add classname one, and remove classnames two,three when selected', function(){
@@ -274,6 +279,11 @@ describe('Toggler', function(){
       assert.isTrue($('.panels').classList.contains('one'))
       assert.isTrue(!$('.panels').classList.contains('two'))
       assert.isTrue(!$('.panels').classList.contains('three'))
+
+      assert.isTrue(!$('.select-toggle').classList.contains('none'))
+      assert.isTrue($('.select-toggle').classList.contains('one'))
+      assert.isTrue(!$('.select-toggle').classList.contains('two'))
+      assert.isTrue(!$('.select-toggle').classList.contains('three'))
     })
 
     it('should add classname two, and remove classnames one,three when selected', function(){
@@ -281,6 +291,11 @@ describe('Toggler', function(){
       assert.isTrue(!$('.panels').classList.contains('one'))
       assert.isTrue($('.panels').classList.contains('two'))
       assert.isTrue(!$('.panels').classList.contains('three'))
+
+      assert.isTrue(!$('.select-toggle').classList.contains('none'))
+      assert.isTrue(!$('.select-toggle').classList.contains('one'))
+      assert.isTrue($('.select-toggle').classList.contains('two'))
+      assert.isTrue(!$('.select-toggle').classList.contains('three'))
     })
 
     it('should add classname three, and remove classnames one,two when selected', function(){
@@ -288,6 +303,11 @@ describe('Toggler', function(){
       assert.isTrue(!$('.panels').classList.contains('one'))
       assert.isTrue(!$('.panels').classList.contains('two'))
       assert.isTrue($('.panels').classList.contains('three'))
+
+      assert.isTrue(!$('.select-toggle').classList.contains('none'))
+      assert.isTrue(!$('.select-toggle').classList.contains('one'))
+      assert.isTrue(!$('.select-toggle').classList.contains('two'))
+      assert.isTrue($('.select-toggle').classList.contains('three'))
     })
   })
 })

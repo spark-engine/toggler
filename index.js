@@ -69,7 +69,6 @@ var Toggler = {
     if (data){
       if (type.match(/class/i)){
         Toggler.setClass(data, action, el)
-        //console.log(el.dataset.addClass, el.dataset.removeClass)
       } else {
         Toggler.setState(data, action)
       }
@@ -114,28 +113,12 @@ var Toggler = {
     if (selectors) {
       matches = document.querySelectorAll(selectors)
 
-      // If there are no selectors, it may be because a select element has
-      // 
-    } 
-    //else if (el.tagName.match(/option|input/i)) {
-
-      //var showSelectors = el.dataset.show
-      //var hideSelectors = el.dataset.hide
-
-       //Add classname to shown element
-      //if(hideSelectors) {
-        //Toggler.setClass(classnames + ';' + hideSelectors, 'remove', el)
-      //}
-
-       //Remove classname from shown element
-      //if(showSelectors) {
-        //Toggler.setClass(classnames + ';' + showSelectors, 'add', el)
-      //}
-
-      //return
-    //} 
-    else {
-      // If no slectors are present, use the current el for classnames
+    // If no slectors are present, and el is an OPTION, use its SELECT as the matched element
+    } else if (el.tagName.match(/option/i)) {
+      matches = [Toggler.getSelectFromOption(el)]
+      
+    // If no slectors are present, use the current el for classnames
+    } else {
       matches = [el]
     }
 
