@@ -192,6 +192,34 @@ describe('Toggler', function(){
       assert.isTrue(!visible($('.panel-two')))
       assert.isTrue(visible($('.panel-three')))
     })
+
+    it('should remove classnames one,two,three when none is selected', function(){
+      checkInput($('.none'))
+      assert.isTrue(!$('.panels').classList.contains('one'))
+      assert.isTrue(!$('.panels').classList.contains('two'))
+      assert.isTrue(!$('.panels').classList.contains('three'))
+    })
+
+    it('should add classname one, and remove classnames two,three when selected', function(){
+      checkInput($('.one'))
+      assert.isTrue($('.panels').classList.contains('one'))
+      assert.isTrue(!$('.panels').classList.contains('two'))
+      assert.isTrue(!$('.panels').classList.contains('three'))
+    })
+
+    it('should add classname two, and remove classnames one,three when selected', function(){
+      checkInput($('.two'))
+      assert.isTrue(!$('.panels').classList.contains('one'))
+      assert.isTrue($('.panels').classList.contains('two'))
+      assert.isTrue(!$('.panels').classList.contains('three'))
+    })
+
+    it('should add classname three, and remove classnames one,two when selected', function(){
+      checkInput($('.three'))
+      assert.isTrue(!$('.panels').classList.contains('one'))
+      assert.isTrue(!$('.panels').classList.contains('two'))
+      assert.isTrue($('.panels').classList.contains('three'))
+    })
   })
 
   describe('select input', function(){
@@ -232,6 +260,34 @@ describe('Toggler', function(){
       assert.isTrue(!visible($('.panel-one')))
       assert.isTrue(!visible($('.panel-two')))
       assert.isTrue(visible($('.panel-three')))
+    })
+
+    it('should remove classnames one,two,three when none is selected', function(){
+      selectIndex($('.select-toggle'), 0)
+      assert.isTrue(!$('.panels').classList.contains('one'))
+      assert.isTrue(!$('.panels').classList.contains('two'))
+      assert.isTrue(!$('.panels').classList.contains('three'))
+    })
+
+    it('should add classname one, and remove classnames two,three when selected', function(){
+      selectIndex($('.select-toggle'), 1)
+      assert.isTrue($('.panels').classList.contains('one'))
+      assert.isTrue(!$('.panels').classList.contains('two'))
+      assert.isTrue(!$('.panels').classList.contains('three'))
+    })
+
+    it('should add classname two, and remove classnames one,three when selected', function(){
+      selectIndex($('.select-toggle'), 2)
+      assert.isTrue(!$('.panels').classList.contains('one'))
+      assert.isTrue($('.panels').classList.contains('two'))
+      assert.isTrue(!$('.panels').classList.contains('three'))
+    })
+
+    it('should add classname three, and remove classnames one,two when selected', function(){
+      selectIndex($('.select-toggle'), 3)
+      assert.isTrue(!$('.panels').classList.contains('one'))
+      assert.isTrue(!$('.panels').classList.contains('two'))
+      assert.isTrue($('.panels').classList.contains('three'))
     })
   })
 })

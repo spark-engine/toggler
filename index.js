@@ -50,8 +50,9 @@ var Toggler = {
     })
 
     // Support data-add-class on selects (targets currently selected item
-    if (select) 
-      Toggler.dispatch(select, 'addClass')
+    // TODO: Thinking this is a silly idea.
+    //if (select) 
+      //Toggler.dispatch(select, 'addClass')
   },
 
   dispatch: function(el, type) {
@@ -59,7 +60,7 @@ var Toggler = {
     var data = el.dataset[type]
 
     // Abort if element doesn't have data for the action
-    if (typeof data == 'undefined' || data == '') return
+    if (!data || typeof data == 'undefined' || data == '') return
 
     // Toggle and show are treated the same for checkboxes
     if (el.type == 'checkbox')
@@ -68,6 +69,7 @@ var Toggler = {
     if (data){
       if (type.match(/class/i)){
         Toggler.setClass(data, action, el)
+        //console.log(el.dataset.addClass, el.dataset.removeClass)
       } else {
         Toggler.setState(data, action)
       }
@@ -83,6 +85,11 @@ var Toggler = {
   //   - "foo bar; selector" - change classnames on elements matched by selector
   //   - "foo bar; selector, selector" - match multiple selectors
   //
+  //  You can perform multiple add/remove classes by joining values with an `&`
+  //  For example: "classname & foo bar; selector"
+  //  This would toggle classname on current element and toggle `foo bar` classnames
+  //  on an element matching the selector
+  //
 
   setClass: function (selectors, action, el){
     if(typeof selectors == 'undefined' || selectors == '') return
@@ -91,42 +98,51 @@ var Toggler = {
       action = (action ? 'add' : 'remove')
     }
 
+    if (selectors.match(/&/)) {
+      selectors.split('&').forEach(function(sel){
+        Toggler.setClass(sel.trim(), action, el) 
+      })
+      return
+    }
+
     // Get selector and classnames, format: "classname classname; selector,selector"
     var settings = selectors.split(';')
     var classnames = settings[0].trim()
     var matches = []
     selectors = settings[1]
 
-    // If no slectors are present, use the current el for classnames
     if (selectors) {
       matches = document.querySelectorAll(selectors)
-    } else if (el.tagName.match(/select|input/i)) {
 
-      // Retrieve dataset from selected option
-      if (el.tagName.match(/select/i))
-        el = el.selectedOptions[0]
+      // If there are no selectors, it may be because a select element has
+      // 
+    } 
+    //else if (el.tagName.match(/option|input/i)) {
 
-      var showSelectors = el.dataset.show
-      var hideSelectors = el.dataset.hide
+      //var showSelectors = el.dataset.show
+      //var hideSelectors = el.dataset.hide
 
-      // Add classname to shown element
-      if(hideSelectors) {
-        Toggler.setClass(classnames + ';' + hideSelectors, 'remove', el)
-      }
+       //Add classname to shown element
+      //if(hideSelectors) {
+        //Toggler.setClass(classnames + ';' + hideSelectors, 'remove', el)
+      //}
 
-      // Remove classname from shown element
-      if(showSelectors) {
-        Toggler.setClass(classnames + ';' + showSelectors, 'add', el)
-      }
+       //Remove classname from shown element
+      //if(showSelectors) {
+        //Toggler.setClass(classnames + ';' + showSelectors, 'add', el)
+      //}
 
-      return
-    } else {
+      //return
+    //} 
+    else {
+      // If no slectors are present, use the current el for classnames
       matches = [el]
     }
 
     Array.prototype.forEach.call(matches, function(match){
       Array.prototype.forEach.call(classnames.split(' '), function(classname) {
-        match.classList[action.replace(/Class/,'')](classname)
+        var method = action.replace(/Class/,'')
+        match.classList[method](classname)
       })
 
       Toggler.triggerTogglerEventsOnChildren(match, 'class')
@@ -134,7 +150,6 @@ var Toggler = {
   },
 
   setState: function(selectors, state) {
-    if(typeof selectors == 'undefined' || selectors == '') return
     var matches = document.querySelectorAll(selectors)
 
     Array.prototype.forEach.call(matches, function(match){
@@ -212,15 +227,17 @@ var Toggler = {
       if (!radio.dataset.togglerActive) {
         var radioName = radio.getAttribute('name')
         var siblings = Toggler.parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]')
-        var selectors = Toggler.dataAttributes(siblings, 'show')
+        var hideSelectors = Toggler.dataAttributes(siblings, 'show')
+        var removeSelectors = Toggler.dataAttributes(siblings, 'addClass')
 
         Array.prototype.forEach.call(siblings, function(r){
           // Ensure that all radio buttons in a group have a default data-show value of ''
           // This means that unset data-show values are toggle off everything
           //
           r.dataset.show = r.dataset.show || ''
+          r.dataset.addClass = r.dataset.addClass || ''
 
-          r.dataset.hide = selectors.filter(function(selector){
+          r.dataset.hide = hideSelectors.filter(function(selector){
             return r.dataset.show != selector
           }).join(',')
 
@@ -228,6 +245,13 @@ var Toggler = {
           // This means that unset data-add-class values are toggle off all classes
           //
           r.dataset.addClass = r.dataset.addClass || ''
+
+          // Ensure that selected radio buttons remove classes according
+          // to the deselected radio buttons
+          r.dataset.removeClass = removeSelectors.filter(function(selector){
+            return r.dataset.addClass != selector
+          }).join('&')
+
 
           r.dataset.togglerActive = true
         })
@@ -252,14 +276,20 @@ var Toggler = {
         select.classList.add('select-toggler')
         var options = select.querySelectorAll('option')
 
-        var selectors = Toggler.dataAttributes(options, 'show')
+        var hideSelectors = Toggler.dataAttributes(options, 'show')
+        var removeSelectors = Toggler.dataAttributes(options, 'addClass')
 
         Array.prototype.forEach.call(options, function(o) {
           o.dataset.show = o.dataset.show || ''
+          o.dataset.addClass = o.dataset.addClass || ''
 
-          o.dataset.hide = selectors.filter(function(selector){
-            return (o.dataset.show != selector)
+          o.dataset.hide = hideSelectors.filter(function(selector){
+            return o.dataset.show != selector
           }).join(',')
+
+          o.dataset.removeClass = removeSelectors.filter(function(selector){
+            return o.dataset.addClass != selector
+          }).join(' & ')
 
           o.dataset.togglerActive = true
         })
