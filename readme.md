@@ -82,15 +82,54 @@ Radio buttons with matching `name` attributes work just like select options. Her
 
 ## Toggling Classnames
 
-Class toggling elements will have a `data-toggle-class`, `data-add-class`, or `data-remove-class` property. Here are some examples of values of these attributes:
+Much like visiblity toggling, toggling classes with links or buttons works a bit differently than inputs with states.
 
-- "classname" - add/remove/toggle classname on current element.
-- "foo bar"   - multiple classnames, separated by spaces (like the html class property).
-- "foo bar; .selector" - change classnames on elements matched by selector.
-- "foo bar; #selector, .selector" - changes classnames on multiple elements.
+Class toggling is triggered by the data attributes `data-toggle-class`, `data-add-class`, or `data-remove-class`. Here are some examples values:
+
+- `classname` - add/remove/toggle classname on current element.
+- `foo bar` - multiple classnames, separated by spaces (like the html class property).
+- `foo bar; .selector` - change classnames on elements matching `.selector`.
+- `foo bar; #selector, .selector` - changes classnames on multiple elements.
 
 Toggle the class `active` on a navigation menu when clicking a button.
 
 ```html
   <button data-toggle-class='active; .nav-menu'>Toggle Navigation</button>
 ```
+
+You can also change different classnames on multiple elements by using the `&` character. For example:
+
+- `classname & foo; .selector` - add/remove/toggle 'classname' on current element and 'foo' on elements matching `.selector`.
+- `highlighted; #selector & active; .selector` - multiple classnames are changed on multiple elements.
+
+### Toggling classes with inputs: Checkbox, Radio Button, Select Option
+
+Again, checkboxes toggle based on the state of the input. With `data-class-toggle`, or `data-class-add`, If a checkbox is checked classes will be added, if unchecked they'll be removed. Also with
+`data-class-remove` the behavior will be inverted.
+
+Selects and radio inputs behave much like they do with `data-show`. With each, only `data-add-class` is used. Classes are added based on the selected item and removed based on the items which aren't
+selected.
+
+In the follwing example, selecting different inputs will change the class name on elements matching the selector `.some-div`. If the first input is selected. `.some-div` will have the class
+`cats` and if it has the classes `dogs` or `fish`, they will be removed.
+
+```html
+<input type='radio' data-add-class='cats; .some-div' name='test' id='cats'><label for="#cats">Cats</label>
+<input type='radio' data-add-class='dogs; .some-div' name='test' id='dogs'><label for="#dogs">Dogs</label>
+<input type='radio' data-add-class='fish; .some-div' name='test' id='fish'><label for="#fish">Fish</label>
+```
+
+The next example is the same except, by using the `&` two elements are targetd with the classname changes. In this case, since there are class names but no selectors, the classnames are
+added to or removed from the select element. You might do this if you want to style the select differently based on what is chosen.
+
+```html
+<select>
+  <option data-add-class='cats & cats; .some-div'>Cats</option>
+  <option data-add-class='dogs & dogs; .some-div'>Dogs</option>
+  <option data-add-class='fish & fish; .some-div'>Fish</option>
+</select>
+```
+
+For example, when the first option is chosen, the seelct will have the classname `cats` added and elements matching `.some-div` will have the classname `cats` added too. If either of these had
+the classnames `dogs` or `fish` those would be removed.
+

@@ -48,11 +48,6 @@ var Toggler = {
     actions.forEach(function(action) {
       Toggler.dispatch(target, action)
     })
-
-    // Support data-add-class on selects (targets currently selected item
-    // TODO: Thinking this is a silly idea.
-    //if (select) 
-      //Toggler.dispatch(select, 'addClass')
   },
 
   dispatch: function(el, type) {
