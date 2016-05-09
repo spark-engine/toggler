@@ -1,10 +1,10 @@
 {
   "name": "compose-toggler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Easily toggle elements visibility or classnames from click or change events",
   "main": "index.js",
   "scripts": {
-    "test": "mochify"
+    "test": "mochify --transform brfs"
   },
   "repository": {
     "type": "git",
@@ -13,11 +13,6 @@
   "keywords": [
     "toggle"
   ],
-  "browserify": {
-    "transform": [
-      "brfs"
-    ]
-  },
   "author": "Brandon Mathis",
   "license": "MIT",
   "dependencies": {
