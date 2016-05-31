@@ -1,4 +1,4 @@
-var event = require('compose-event')
+var Event = require('compose-event')
 
 var Toggler = {
   checkboxSelector: "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
@@ -6,8 +6,8 @@ var Toggler = {
   selectSelector: "option[data-show]",
 
   listen: function(){
-    event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", Toggler.trigger)
-    event.on(document, "change", ".select-toggler", Toggler.trigger)
+    Event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", Toggler.trigger)
+    Event.on(document, "change", ".select-toggler", Toggler.trigger)
   },
 
   refresh: function(){

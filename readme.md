@@ -94,7 +94,7 @@ Class toggling is triggered by the data attributes `data-toggle-class`, `data-ad
 Toggle the class `active` on a navigation menu when clicking a button.
 
 ```html
-  <button data-toggle-class='active; .nav-menu'>Toggle Navigation</button>
+<button data-toggle-class='active; .nav-menu'>Toggle Navigation</button>
 ```
 
 You can also change different classnames on multiple elements by using the `&` character. For example:
