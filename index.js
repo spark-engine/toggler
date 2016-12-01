@@ -34,7 +34,7 @@ var Toggler = {
     // Events fire on the select, but the options have toggling attributes
     if (target.tagName.match(/select/i)) {
       select = target
-      target = target.selectedOptions[0]
+      target = select.selectedOptions[0]
     }
 
     // Radio inputs and selects do not support toggling, so remove them
@@ -205,7 +205,8 @@ var Toggler = {
       if (!radio.dataset.togglerActive) {
         var radioName = radio.getAttribute('name')
         var siblings = Toggler.parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]')
-        var hideSelectors = Toggler.dataAttributes(siblings, 'show')
+
+        var showSelectors = Toggler.dataAttributes(siblings, 'show')
         var removeSelectors = Toggler.dataAttributes(siblings, 'addClass')
 
         Array.prototype.forEach.call(siblings, function(r){
@@ -215,8 +216,12 @@ var Toggler = {
           r.dataset.show = r.dataset.show || ''
           r.dataset.addClass = r.dataset.addClass || ''
 
-          r.dataset.hide = hideSelectors.filter(function(selector){
-            return r.dataset.show != selector
+          // Append element's data-hide to showSelectors
+          if ( r.dataset.hide && r.dataset.hide.length > 0 )
+            showSelectors = showSelectors.concat( r.dataset.hide.split( ',' ) )
+
+          r.dataset.hide = showSelectors.filter(function(selector){
+            return r.dataset.show.indexOf( selector )
           }).join(',')
 
           // Ensure that all radio buttons in a group have a default data-add-class value of ''
@@ -227,7 +232,7 @@ var Toggler = {
           // Ensure that selected radio buttons remove classes according
           // to the deselected radio buttons
           r.dataset.removeClass = removeSelectors.filter(function(selector){
-            return r.dataset.addClass != selector
+            return r.dataset.addClass.indexOf( selector )
           }).join('&')
 
 
@@ -254,19 +259,25 @@ var Toggler = {
         select.classList.add('select-toggler')
         var options = select.querySelectorAll('option')
 
-        var hideSelectors = Toggler.dataAttributes(options, 'show')
+        var showSelectors   = Toggler.dataAttributes(options, 'show')
         var removeSelectors = Toggler.dataAttributes(options, 'addClass')
 
         Array.prototype.forEach.call(options, function(o) {
           o.dataset.show = o.dataset.show || ''
           o.dataset.addClass = o.dataset.addClass || ''
 
-          o.dataset.hide = hideSelectors.filter(function(selector){
-            return o.dataset.show != selector
+          // Append element's data-hide to showSelectors
+          if ( o.dataset.hide && o.dataset.hide.length > 0 )
+            showSelectors = showSelectors.concat( o.dataset.hide.split( ',' ) )
+
+          // If show selectors are not present in element's data-show
+          // Add them to the list of selectors to be hidden
+          o.dataset.hide = showSelectors.filter(function(selector){
+            return o.dataset.show.indexOf( selector )
           }).join(',')
 
           o.dataset.removeClass = removeSelectors.filter(function(selector){
-            return o.dataset.addClass != selector
+            return o.dataset.addClass.indexOf( selector )
           }).join(' & ')
 
           o.dataset.togglerActive = true

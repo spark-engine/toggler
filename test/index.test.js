@@ -177,6 +177,7 @@ describe('Toggler', function(){
       assert.isTrue(visible($('.panel-one')))
       assert.isTrue(!visible($('.panel-two')))
       assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(!visible($('.hide-test')))
     })
 
     it('shows only the second when two is selected', function(){
@@ -232,6 +233,7 @@ describe('Toggler', function(){
       assert.isTrue(!visible($('.panel-one')))
       assert.isTrue(visible($('.panel-two')))
       assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(!visible($('.hide-test')))
     })
 
     it('should hide all panels when none is selected', function(){
