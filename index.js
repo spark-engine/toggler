@@ -34,7 +34,7 @@ var Toggler = {
     // Events fire on the select, but the options have toggling attributes
     if (target.tagName.match(/select/i)) {
       select = target
-      target = target.selectedOptions[0]
+      target = select.selectedOptions[0]
     }
 
     // Radio inputs and selects do not support toggling, so remove them
