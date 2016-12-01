@@ -190,7 +190,7 @@ var Toggler = {
 
     Array.prototype.forEach.call(leafChildNodes, function(node) {
       // 'toggler:show', 'toggler:hide', etc
-      event.fire(node, "toggler:" + eventName)
+      Event.fire(node, "toggler:" + eventName)
     })
   },
 
@@ -315,7 +315,7 @@ var Toggler = {
   }
 }
 
-event.ready(Toggler.listen)
-event.change(Toggler.refresh)
+Event.ready(Toggler.listen)
+Event.change(Toggler.refresh)
 
 module.exports = Toggler
