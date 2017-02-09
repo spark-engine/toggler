@@ -145,7 +145,7 @@ var Toggler = {
     }
 
     if (action == 'toggle') {
-      if (el.offsetParent === null) {
+      if (el.classList.contains('hidden')) {
         action = 'show'
       } else {
         action = 'hide'
@@ -159,6 +159,11 @@ var Toggler = {
     el.classList.remove('hidden')
     el.classList.add('visible')
 
+    // Enable inputs, fieldsets or forms when shown
+    if ( typeof el.disabled != 'undefined' ){
+      el.disabled = false
+    }
+
     // Focus on key element if an element expects focus
     var focusEl = el.querySelector('[data-focus]')
     if (focusEl) { focusEl.focus() }
@@ -170,6 +175,11 @@ var Toggler = {
   hide: function(el) {
     el.classList.remove('visible')
     el.classList.add('hidden')
+
+    // Disable inputs, fieldsets or forms when hidden
+    if ( typeof el.disabled != 'undefined' ){
+      el.disabled = true
+    }
   },
 
   getLeafNodes: function (parent) {

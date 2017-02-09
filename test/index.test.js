@@ -10,7 +10,8 @@ var templates = {
   click: fs.readFileSync(__dirname + '/templates/click.html', 'utf8'),
   checkbox: fs.readFileSync(__dirname + '/templates/checkbox.html', 'utf8'),
   radio: fs.readFileSync(__dirname + '/templates/radio.html', 'utf8'),
-  select: fs.readFileSync(__dirname + '/templates/select.html', 'utf8')
+  select: fs.readFileSync(__dirname + '/templates/select.html', 'utf8'),
+  fieldset: fs.readFileSync(__dirname + '/templates/fieldsets.html', 'utf8')
 }
 
 var checkInput = function(input) {
@@ -31,7 +32,7 @@ var selectIndex = function(input, index) {
 }
 
 var visible = function(element) {
-  return element.offsetParent !== null
+  return !element.classList.contains('hidden')
 }
 
 var setTemplate = function(name) {
@@ -46,7 +47,6 @@ var setTemplate = function(name) {
 describe('Toggler', function(){
   before(function(){
     event.fire(document, 'DOMContentLoaded')
-    document.body.appendChild(domify('<style>.hidden { display: none; }</style>'))
   })
 
   describe('click', function(){
@@ -310,6 +310,26 @@ describe('Toggler', function(){
       assert.isTrue(!$('.select-toggle').classList.contains('one'))
       assert.isTrue(!$('.select-toggle').classList.contains('two'))
       assert.isTrue($('.select-toggle').classList.contains('three'))
+    })
+  })
+
+  describe('select fieldset', function(){
+    before(function(){
+      setTemplate('fieldset')
+    })
+
+    it('initializes disabled fieldset matching default selected option', function(){
+      assert.isTrue( $('.select-fieldset').selectedIndex == 2 )
+      assert.isTrue( $('.panel-one').disabled )
+      assert.isTrue( !$('.panel-two').disabled )
+      assert.isTrue( $('.panel-three').disabled )
+    })
+
+    it('should hide all panels when none is selected', function(){
+      selectIndex($('.select-fieldset'), 0)
+      assert.isTrue( $('.panel-one').disabled )
+      assert.isTrue( $('.panel-two').disabled )
+      assert.isTrue( $('.panel-three').disabled )
     })
   })
 })
