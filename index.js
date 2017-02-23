@@ -2,8 +2,8 @@ var Event = require('compose-event')
 
 var Toggler = {
   checkboxSelector: "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
-  radioSelector: "input[type=radio][data-show], input[type=radio][data-add-class]",
-  selectSelector: "option[data-show]",
+  radioSelector: "input[type=radio][data-show], input[type=radio][data-hide], input[type=radio][data-add-class], input[type=radio][data-remove-class]",
+  selectSelector: "option[data-hide], option[data-show]",
 
   listen: function(){
     Event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", Toggler.trigger)
@@ -109,11 +109,11 @@ var Toggler = {
       matches = document.querySelectorAll(selectors)
 
     // If no slectors are present, and el is an OPTION, use its SELECT as the matched element
-    } else if (el.tagName.match(/option/i)) {
+    } else if (el && el.tagName.match(/option/i)) {
       matches = [Toggler.getSelectFromOption(el)]
       
     // If no slectors are present, use the current el for classnames
-    } else {
+    } else if (el) {
       matches = [el]
     }
 
@@ -211,17 +211,18 @@ var Toggler = {
   },
 
   setupRadios: function() {
-    Array.prototype.forEach.call(document.querySelectorAll(Toggler.radioSelector), function(radio){
+    Array.prototype.forEach.call(document.querySelectorAll(Toggler.radioSelector), function(radio, index){
       if (!radio.dataset.togglerActive) {
-        var radioName = radio.getAttribute('name')
-        var siblings = Toggler.parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]')
 
-        var showSelectors = Toggler.dataAttributes(siblings, 'show')
-        var removeSelectors = Toggler.dataAttributes(siblings, 'addClass')
+        var radioName         = radio.getAttribute('name'),
+            siblings          = Toggler.parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]'),
+            showSelectors     = Toggler.dataAttributes(siblings, 'show'),
+            addClassSelectors = Toggler.dataAttributes(siblings, 'addClass'),
+            checked
 
         Array.prototype.forEach.call(siblings, function(r){
           // Ensure that all radio buttons in a group have a default data-show value of ''
-          // This means that unset data-show values are toggle off everything
+          // This means that unset data-show values will toggle off everything
           //
           r.dataset.show = r.dataset.show || ''
           r.dataset.addClass = r.dataset.addClass || ''
@@ -241,17 +242,25 @@ var Toggler = {
 
           // Ensure that selected radio buttons remove classes according
           // to the deselected radio buttons
-          r.dataset.removeClass = removeSelectors.filter(function(selector){
+          r.dataset.removeClass = addClassSelectors.filter(function(selector){
             return r.dataset.addClass.indexOf( selector )
           }).join('&')
 
 
           r.dataset.togglerActive = true
+
+          if( r.checked ) checked = r
+
         })
 
+        if ( checked ) {
+          Toggler.triggerToggling( checked )
+        } else {
+          Toggler.setState( showSelectors.join(','), 'hide' )
+          Toggler.setClass( addClassSelectors.join(' & '), 'removeClass' )
+        }
       }
-      if(radio.checked)
-        Toggler.triggerToggling(radio)
+
     })
   },
 
@@ -269,8 +278,8 @@ var Toggler = {
         select.classList.add('select-toggler')
         var options = select.querySelectorAll('option')
 
-        var showSelectors   = Toggler.dataAttributes(options, 'show')
-        var removeSelectors = Toggler.dataAttributes(options, 'addClass')
+        var showSelectors     = Toggler.dataAttributes(options, 'show')
+        var addClassSelectors = Toggler.dataAttributes(options, 'addClass')
 
         Array.prototype.forEach.call(options, function(o) {
           o.dataset.show = o.dataset.show || ''
@@ -286,7 +295,7 @@ var Toggler = {
             return o.dataset.show.indexOf( selector )
           }).join(',')
 
-          o.dataset.removeClass = removeSelectors.filter(function(selector){
+          o.dataset.removeClass = addClassSelectors.filter(function(selector){
             return o.dataset.addClass.indexOf( selector )
           }).join(' & ')
 

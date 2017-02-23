@@ -152,9 +152,8 @@ describe('Toggler', function(){
     })
 
     it('initializes visibility matching default checked state', function(){
-      assert.isTrue($('.two').checked)
       assert.isTrue(!visible($('.panel-one')))
-      assert.isTrue(visible($('.panel-two')))
+      assert.isTrue(!visible($('.panel-two')))
       assert.isTrue(!visible($('.panel-three')))
     })
 
