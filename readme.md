@@ -80,6 +80,12 @@ Radio buttons with matching `name` attributes work just like select options. Her
 <input type='radio' name='animal' data-show='.fish' value='fish' id='fish'><label for="#fish">Fish</label>
 ```
 
+### Anchors
+
+Adding the `data-anchor='#name'` attribute to a select `<option>` or radio input, will change the `window.location.hash` property to
+match the current selection. Also when a page loads, if the current page anchor matches a `data-anchor` attribute it will select that
+option or check that input.
+
 ## Toggling Classnames
 
 Much like visiblity toggling, toggling classes with links or buttons works a bit differently than inputs with states.

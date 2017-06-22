@@ -42,6 +42,9 @@ var Toggler = {
       actions = actions.filter(function(action) {
         return !action.match(/toggle/)
       })
+      if (target.dataset.anchor) {
+        window.location.hash = target.dataset.anchor 
+      }
     }
 
     // Dispatch all actions
@@ -221,6 +224,11 @@ var Toggler = {
             checked
 
         Array.prototype.forEach.call(siblings, function(r){
+
+          if (r.dataset.anchor && window.location.hash == ('#'+r.dataset.anchor.replace('#',''))) {
+            r.checked = true
+          }
+
           // Ensure that all radio buttons in a group have a default data-show value of ''
           // This means that unset data-show values will toggle off everything
           //
@@ -248,6 +256,7 @@ var Toggler = {
 
 
           r.dataset.togglerActive = true
+
 
           if( r.checked ) checked = r
 
@@ -281,7 +290,12 @@ var Toggler = {
         var showSelectors     = Toggler.dataAttributes(options, 'show')
         var addClassSelectors = Toggler.dataAttributes(options, 'addClass')
 
-        Array.prototype.forEach.call(options, function(o) {
+        Array.prototype.forEach.call(options, function(o, index) {
+
+          if (o.dataset.anchor && window.location.hash == ('#'+o.dataset.anchor.replace('#',''))) {
+            select.selectedIndex = index
+          }
+
           o.dataset.show = o.dataset.show || ''
           o.dataset.addClass = o.dataset.addClass || ''
 
