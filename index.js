@@ -23,10 +23,10 @@ var Toggler = {
       event.stop()
     } 
 
-    Toggler.triggerToggling(event.currentTarget)
+    Toggler.triggerToggling(event.currentTarget, event)
   },
 
-  triggerToggling: function(target) {
+  triggerToggling: function(target, event) {
     var actions = ['hide', 'toggle', 'show', 'removeClass', 'toggleClass', 'addClass']
     var select
 
@@ -42,7 +42,8 @@ var Toggler = {
       actions = actions.filter(function(action) {
         return !action.match(/toggle/)
       })
-      if (target.dataset.anchor) {
+      // If triggered by event, set location hash (prevent triggering on setup)
+      if (event && target.dataset.anchor) {
         window.location.hash = target.dataset.anchor 
       }
     }
