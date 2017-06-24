@@ -8,6 +8,26 @@ var Toggler = {
   listen: function(){
     Event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", Toggler.trigger)
     Event.on(document, "change", ".select-toggler", Toggler.trigger)
+    Event.on(window, 'hashchange', Toggler.hashChange)
+  },
+
+  hashChange: function() {
+    if ( window.location.hash ) {
+
+      var anchor = '[data-anchor="'+window.location.hash+'"]'
+      var target = document.querySelector( 'input'+anchor+ ', option'+anchor )
+
+      if ( target ) {
+        if ( target.type == 'radio' ) {
+          target.checked = true
+        } else {
+          var select = Toggler.getSelectFromOption(target)
+          select.selectedIndex = target.index
+          target = select
+        }
+        ratchet.toggler.triggerToggling( target )
+      }
+    }
   },
 
   refresh: function(){
@@ -42,10 +62,6 @@ var Toggler = {
       actions = actions.filter(function(action) {
         return !action.match(/toggle/)
       })
-      // If triggered by event, set location hash (prevent triggering on setup)
-      if (event && target.dataset.anchor) {
-        window.location.hash = target.dataset.anchor 
-      }
     }
 
     // Dispatch all actions
