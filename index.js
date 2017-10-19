@@ -25,7 +25,7 @@ var Toggler = {
           select.selectedIndex = target.index
           target = select
         }
-        ratchet.toggler.triggerToggling( target )
+        Toggler.triggerToggling( target )
       }
     }
   },
@@ -58,15 +58,16 @@ var Toggler = {
     }
 
     // Radio inputs and selects do not support toggling, so remove them
-    if (select || target.type == 'radio') {
-      actions = actions.filter(function(action) {
+    actions = actions.filter(function(action) {
+      if (select || target.type == 'radio') {
         return !action.match(/toggle/)
-      })
-    }
-
+      }
+      return target.dataset[action] != null
+    })
+    
     // Dispatch all actions
-    actions.forEach(function(action) {
-      Toggler.dispatch(target, action)
+    actions.forEach( function( action ) {
+      Toggler.dispatch( target, action )
     })
   },
 
@@ -158,14 +159,14 @@ var Toggler = {
     })
   },
 
-  toggleAction: function(el, action) {
+  toggleAction: function( el, action ) {
 
-    if (typeof(action) == 'boolean') {
-      action = (action ? 'show' : 'hide')
+    if ( typeof action == 'boolean' ) {
+      action = ( action ? 'show' : 'hide' )
     }
 
     if (action == 'toggle') {
-      if (el.classList.contains('hidden')) {
+      if ( el.classList.contains('hidden') || el.classList.contains('hiding') ) {
         action = 'show'
       } else {
         action = 'hide'
@@ -176,29 +177,63 @@ var Toggler = {
   },
 
   show: function(el) {
-    el.classList.remove('hidden')
-    el.classList.add('visible')
+    if ( el.classList.contains( 'visible' ) || 
+         el.classList.contains( 'showing' ) ||
+         el.offsetParent != null ) {
+      return
+    }
+    el.classList.remove( 'hidden', 'hiding' )
 
-    // Enable inputs, fieldsets or forms when shown
-    if ( typeof el.disabled != 'undefined' ){
-      el.disabled = false
+    var fullyShow = function() {
+      // Remove hidden because it might be added before this fires
+      el.classList.remove( 'showing', 'hidden' )
+      el.classList.add( 'visible' )
+
+      // Enable inputs, fieldsets or forms when shown
+      if ( typeof el.disabled != 'undefined' ){
+        el.disabled = false
+      }
+
+      // Focus on key element if an element expects focus
+      var focusEl = el.querySelector('[data-focus]')
+      if (focusEl) { focusEl.focus() }
+
+      // Trigger input event on ranges that have been hidden
+      var ranges = el.querySelectorAll('[type=range]')
     }
 
-    // Focus on key element if an element expects focus
-    var focusEl = el.querySelector('[data-focus]')
-    if (focusEl) { focusEl.focus() }
-
-    // Trigger input event on ranges that have been hidden
-    var ranges = el.querySelectorAll('[type=range]')
+    if ( el.dataset.animate ) {
+      Event.afterAnimation( el, fullyShow, true)
+      el.classList.add( 'showing' )
+    } else {
+      fullyShow()
+    }
   },
 
   hide: function(el) {
-    el.classList.remove('visible')
-    el.classList.add('hidden')
+    if ( el.classList.contains( 'hidden' ) || 
+         el.classList.contains( 'hiding' ) ) {
+      return
+    }
 
-    // Disable inputs, fieldsets or forms when hidden
-    if ( typeof el.disabled != 'undefined' ){
-      el.disabled = true
+    // Remove showing because it might be added before this fires
+    el.classList.remove( 'visible', 'showing' )
+
+    var fullyHide = function() {
+      el.classList.remove( 'hiding', 'visible' )
+      el.classList.add( 'hidden' )
+
+      // Disable inputs, fieldsets or forms when hidden
+      if ( typeof el.disabled != 'undefined' ){
+        el.disabled = true
+      }
+    }
+
+    if ( el.dataset.animate ) {
+      Event.afterAnimation( el, fullyHide, true)
+      el.classList.add( 'hiding' )
+    } else {
+      fullyHide()
     }
   },
 

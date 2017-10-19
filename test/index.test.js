@@ -35,18 +35,22 @@ var visible = function(element) {
   return !element.classList.contains('hidden')
 }
 
+var hidden = function(element) {
+  return element.classList.contains('hidden')
+}
+
 var setTemplate = function(name) {
   var previousTest = $('.test-template')
   if (previousTest) document.body.removeChild(previousTest)
 
-  var template = "<div class='test-template'>" + templates[name] + "</div>"
+  var template = "<div class='test-template'><style>.hidden { display: none }</style>" + templates[name] + "</div>"
   document.body.appendChild(domify(template))
-  event.fire(document, 'page:change')
+  event.change.fire()
 }
 
 describe('Toggler', function(){
   before(function(){
-    event.fire(document, 'DOMContentLoaded')
+    event.ready.fire()
   })
 
   describe('click', function(){
@@ -59,7 +63,7 @@ describe('Toggler', function(){
       var toggleEl = $('.toggler')
 
       event.fire(toggleEl, 'click')
-      assert.isTrue(!visible(menu))
+      assert.isTrue(hidden(menu))
 
       event.fire(toggleEl, 'click')
       assert.isTrue(visible(menu))
@@ -110,7 +114,7 @@ describe('Toggler', function(){
     })
     it('initializes visibility matching default checked state', function(){
       assert.isTrue($('.hide').checked)
-      assert.isTrue(!visible($('.menu')))
+      assert.isTrue(hidden($('.menu')))
     })
 
     it('matches data-toggle state with visibility', function(){
@@ -124,8 +128,8 @@ describe('Toggler', function(){
     })
 
     it('inverts data-hide state with visibility', function(){
-      assert.equal(checkInput($('.hide')),     !visible($('.menu')))
-      assert.equal(uncheckInput($('.hide')),   !visible($('.menu')))
+      assert.equal(checkInput($('.hide')),     hidden($('.menu')))
+      assert.equal(uncheckInput($('.hide')),   hidden($('.menu')))
     })
 
     // Classname toggling
@@ -152,9 +156,9 @@ describe('Toggler', function(){
     })
 
     it('initializes visibility matching default checked state', function(){
-      assert.isTrue(!visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(hidden($('.panel-one')))
+      assert.isTrue(hidden($('.panel-two')))
+      assert.isTrue(hidden($('.panel-three')))
     })
 
     it('ignores inputs outside of the form', function(){
@@ -166,30 +170,30 @@ describe('Toggler', function(){
 
     it('hides all when none is selected', function(){
       checkInput($('.none'))
-      assert.isTrue(!visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(hidden($('.panel-one')))
+      assert.isTrue(hidden($('.panel-two')))
+      assert.isTrue(hidden($('.panel-three')))
     })
 
     it('shows only the first when one is selected', function(){
       checkInput($('.one'))
       assert.isTrue(visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
-      assert.isTrue(!visible($('.hide-test')))
+      assert.isTrue(hidden($('.panel-two')))
+      assert.isTrue(hidden($('.panel-three')))
+      assert.isTrue(hidden($('.hide-test')))
     })
 
     it('shows only the second when two is selected', function(){
       checkInput($('.two'))
-      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(hidden($('.panel-one')))
       assert.isTrue(visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(hidden($('.panel-three')))
     })
 
     it('shows only the third when three is selected', function(){
       checkInput($('.three'))
-      assert.isTrue(!visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(hidden($('.panel-one')))
+      assert.isTrue(hidden($('.panel-two')))
       assert.isTrue(visible($('.panel-three')))
     })
 
@@ -229,37 +233,37 @@ describe('Toggler', function(){
 
     it('initializes visibility matching default selected option', function(){
       assert.isTrue($('.select-toggle').selectedIndex == 2)
-      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(hidden($('.panel-one')))
       assert.isTrue(visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
-      assert.isTrue(!visible($('.hide-test')))
+      assert.isTrue(hidden($('.panel-three')))
+      assert.isTrue(hidden($('.hide-test')))
     })
 
     it('should hide all panels when none is selected', function(){
       selectIndex($('.select-toggle'), 0)
-      assert.isTrue(!visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(hidden($('.panel-one')))
+      assert.isTrue(hidden($('.panel-two')))
+      assert.isTrue(hidden($('.panel-three')))
     })
 
     it('should show panel one and hide panels two and three when one is selected', function(){
       selectIndex($('.select-toggle'), 1)
       assert.isTrue(visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(hidden($('.panel-two')))
+      assert.isTrue(hidden($('.panel-three')))
     })
 
     it('should show panel two and hide panels one and three when two is selected', function(){
       selectIndex($('.select-toggle'), 2)
-      assert.isTrue(!visible($('.panel-one')))
+      assert.isTrue(hidden($('.panel-one')))
       assert.isTrue(visible($('.panel-two')))
-      assert.isTrue(!visible($('.panel-three')))
+      assert.isTrue(hidden($('.panel-three')))
     })
 
     it('should show panel three and hide panels one and two when three is selected', function(){
       selectIndex($('.select-toggle'), 3)
-      assert.isTrue(!visible($('.panel-one')))
-      assert.isTrue(!visible($('.panel-two')))
+      assert.isTrue(hidden($('.panel-one')))
+      assert.isTrue(hidden($('.panel-two')))
       assert.isTrue(visible($('.panel-three')))
     })
 
