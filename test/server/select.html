@@ -1,17 +1,17 @@
 <script src="/index.build.js"></script>
 <style>.hidden { display: none; }</style>
 
-<select class='select-toggle'>
+<select id='select-toggle'>
   <option data-add-class='none'>none</option>
-  <option data-show='.panel-one' data-hide='.hide-test' data-add-class='one & one; .panels'>one</option>
-  <option data-show='.panel-two' data-hide='.hide-test' data-add-class='two & two; .panels' selected>two</option>
-  <option data-show='.panel-three' data-hide='.hide-test' data-add-class='three & three; .panels'>three</option>
+  <option data-show='#panel-one' data-hide='#hide-test' data-add-class='one & one; #panels'>one</option>
+  <option data-show='#panel-two' data-hide='#hide-test' data-add-class='two & two; #panels' selected>two</option>
+  <option data-show='#panel-three' data-hide='#hide-test' data-add-class='three & three; #panels'>three</option>
 </select>
 
-<div class='panels'>
-  <div class='panel-one'></div>
-  <div class='panel-two'></div>
-  <div class='panel-three'></div>
+<div id='panels'>
+  <div id='panel-one'></div>
+  <div id='panel-two'></div>
+  <div id='panel-three'></div>
 </div>
 
-<div class='hide-test'></div>
+<div id='hide-test'></div>
