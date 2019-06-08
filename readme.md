@@ -1,5 +1,7 @@
 # Toggler
 
+[![Build Status](http://img.shields.io/travis/spark-engine/toggler.svg?style=flat-square)](https://travis-ci.org/spark-engine/toggler)
+
 This is a nice little tool for toggling classnames and visibility on
 elements in response to clicks or form element changes. You can do things
 like:
