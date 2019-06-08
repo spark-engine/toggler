@@ -13,28 +13,28 @@ describe("select toggler", () => {
   })
 
   it("disable all panels when none is selected", async() => {
-    await expect(page).toSelect('#select-toggle', 'none')
+    await expect(page).toSelect('#select-fieldset', 'none')
     await expect(await utils.getProperty('#panel-one', 'disabled')).toBe(true)
     await expect(await utils.getProperty('#panel-two', 'disabled')).toBe(true)
     await expect(await utils.getProperty('#panel-three', 'disabled')).toBe(true)
   })
 
   it("enables panel one and disables two and three when one is selected", async() => {
-    await expect(page).toSelect('#select-toggle', 'one')
+    await expect(page).toSelect('#select-fieldset', 'one')
     await expect(await utils.getProperty('#panel-one', 'disabled')).toBe(false)
     await expect(await utils.getProperty('#panel-two', 'disabled')).toBe(true)
     await expect(await utils.getProperty('#panel-three', 'disabled')).toBe(true)
   })
 
   it("enables panel two and disables one and three when two is selected", async() => {
-    await expect(page).toSelect('#select-toggle', 'two')
+    await expect(page).toSelect('#select-fieldset', 'two')
     await expect(await utils.getProperty('#panel-one', 'disabled')).toBe(true)
     await expect(await utils.getProperty('#panel-two', 'disabled')).toBe(false)
     await expect(await utils.getProperty('#panel-three', 'disabled')).toBe(true)
   })
 
   it("enables panel three and disables one and two when two is selected", async() => {
-    await expect(page).toSelect('#select-toggle', 'three')
+    await expect(page).toSelect('#select-fieldset', 'three')
     await expect(await utils.getProperty('#panel-one', 'disabled')).toBe(true)
     await expect(await utils.getProperty('#panel-two', 'disabled')).toBe(true)
     await expect(await utils.getProperty('#panel-three', 'disabled')).toBe(false)

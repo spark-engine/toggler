@@ -2,7 +2,7 @@ const utils = require("./_utils.js")
 
 describe("click Toggler", () => {
   beforeAll( async () => {
-    await utils.goto("div.html")
+    await utils.goto("basic.html")
   })
 
   it("toggles on click data-toggle", async() => {
