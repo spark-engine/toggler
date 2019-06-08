@@ -2,17 +2,17 @@
 <style>.hidden { display: none; }</style>
 
 <form class='radios'>
-  <input type='radio' class='none'  name='test-radio'>
-  <input type='radio' class='one'   name='test-radio'  data-show='.panel-one' data-hide='.hide-test' data-add-class='one; .panels'>
-  <input type='radio' class='two'   name='test-radio'  data-show='.panel-two' data-add-class='two; .panels'>
-  <input type='radio' class='three' name='test-radio'  data-show='.panel-three' data-add-class='three; .panels'>
+  <input type='radio' id='none'  name='test-radio'>
+  <input type='radio' id='one'   name='test-radio'  data-show='#panel-one' data-hide='#hide-test' data-add-class='one; #panels'>
+  <input type='radio' id='two'   name='test-radio'  data-show='#panel-two' data-add-class='two; #panels'>
+  <input type='radio' id='three' name='test-radio'  data-show='#panel-three' data-add-class='three; #panels'>
 </form>
 
-<div class='panels'>
-  <div class='panel-one'></div>
-  <div class='panel-two'></div>
-  <div class='panel-three'></div>
+<div id='panels'>
+  <div id='panel-one'></div>
+  <div id='panel-two'></div>
+  <div id='panel-three'></div>
 </div>
 
-<input type='radio' class='other-radio' name='test-radio'>
-<div class='hide-test'></div>
+<input type='radio' id='other-radio' name='test-radio'>
+<div id='hide-test'></div>
