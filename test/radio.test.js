@@ -2,7 +2,7 @@ const utils = require("./_utils.js")
 
 describe("radio toggler", () => {
   beforeAll( async () => {
-    await page.goto("http://localhost:8081/radio.html")
+    await utils.goto("radio.html")
   })
 
   it("initializes with hidden elements matching cheked state", async() => {

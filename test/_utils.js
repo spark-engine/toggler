@@ -1,3 +1,7 @@
+const goto = async (url) => {
+  return await page.goto(`http://localhost:8081/${url}`)
+}
+
 const click = async (selector, options) => {
   return await expect(page).toClick(selector, options)
 }
@@ -35,6 +39,7 @@ const dataset = async (selector, object) => {
 }
 
 module.exports = {
+  goto: goto,
   click: click,
   show: show,
   hide: hide,

@@ -2,7 +2,7 @@ const utils = require("./_utils.js")
 
 describe("checkbox Toggler", () => {
   beforeAll( async () => {
-    await page.goto("http://localhost:8081/checkbox.html")
+    await utils.goto("checkbox.html")
   })
 
   it("loads hidden (due to data-hide checkbox being checked)", async() => {

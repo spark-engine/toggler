@@ -2,7 +2,7 @@ const utils = require("./_utils.js")
 
 describe("select toggler", () => {
   beforeAll( async () => {
-    await page.goto("http://localhost:8081/select.html")
+    await utils.goto("select.html")
   })
 
   it("initializes with hidden elements matching cheked state", async() => {
