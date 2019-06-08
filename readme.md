@@ -1,4 +1,4 @@
-# Toggler.js
+# Toggler
 
 This is a nice little tool for toggling classnames and visibility on
 elements in response to clicks or form element changes. You can do things

@@ -3,7 +3,7 @@ var assert = require('chai').assert
 
 var toggler = require('../')
 var domify = require('domify')
-var event = require('compose-event')
+var event = require('@spark-engine/event')
 var $ = function(str) { return document.querySelector(str) }
 
 var templates = {

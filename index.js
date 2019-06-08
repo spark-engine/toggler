@@ -1,4 +1,4 @@
-var Event = require('compose-event')
+var Event = require('@spark-engine/event')
 
 var Toggler = {
   checkboxSelector: "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
@@ -41,7 +41,7 @@ var Toggler = {
     if (event.currentTarget.getAttribute('href') == "#") {
       event.preventDefault()
       event.stop()
-    } 
+    }
 
     Toggler.triggerToggling(event.currentTarget, event)
   },
@@ -64,7 +64,7 @@ var Toggler = {
       }
       return target.dataset[action] != null
     })
-    
+
     // Dispatch all actions
     actions.forEach( function( action ) {
       Toggler.dispatch( target, action )
@@ -115,7 +115,7 @@ var Toggler = {
 
     if (selectors.match(/&/)) {
       selectors.split('&').forEach(function(sel){
-        Toggler.setClass(sel.trim(), action, el) 
+        Toggler.setClass(sel.trim(), action, el)
       })
       return
     }
@@ -132,7 +132,7 @@ var Toggler = {
     // If no slectors are present, and el is an OPTION, use its SELECT as the matched element
     } else if (el && el.tagName.match(/option/i)) {
       matches = [Toggler.getSelectFromOption(el)]
-      
+
     // If no slectors are present, use the current el for classnames
     } else if (el) {
       matches = [el]
@@ -177,7 +177,7 @@ var Toggler = {
   },
 
   show: function(el) {
-    if ( el.classList.contains( 'visible' ) || 
+    if ( el.classList.contains( 'visible' ) ||
          el.classList.contains( 'showing' ) ||
          el.offsetParent != null ) {
       return
@@ -211,7 +211,7 @@ var Toggler = {
   },
 
   hide: function(el) {
-    if ( el.classList.contains( 'hidden' ) || 
+    if ( el.classList.contains( 'hidden' ) ||
          el.classList.contains( 'hiding' ) ) {
       return
     }
@@ -403,7 +403,7 @@ var Toggler = {
   // Return a unique array of all data attribute values from elements
   //
   dataAttributes: function(elements, attr) {
-    return Array.prototype.map.call(elements, function(el) { 
+    return Array.prototype.map.call(elements, function(el) {
       return el.dataset[attr]
     }).filter(function(selectors, index, self) {
       return selectors != "" && typeof selectors != 'undefined' && self.indexOf(selectors) === index
