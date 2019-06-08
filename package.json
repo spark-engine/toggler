@@ -16,7 +16,7 @@
   "author": "Brandon Mathis",
   "license": "MIT",
   "dependencies": {
-    "@spark-engine/event": "^1.9.3"
+    "@spark-engine/event": ">= 1.9 < 2"
   },
   "devDependencies": {
     "browserify": "^16.2.3",

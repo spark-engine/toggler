@@ -290,7 +290,7 @@
   resolved "https://registry.yarnpkg.com/@spark-engine/bean/-/bean-1.0.15.tgz#db0fcc7b1939b7e0f2d5870ae0b676fdb0d9ecd0"
   integrity sha512-5TjTbbdY5j771OD47MaeL3jhiQKripF35soEwlWxYmNeNFDDh6+WUQS8mJwXQ6JAZq7U23hiNuO1Qm2InjYqTA==
 
-"@spark-engine/event@^1.9.3":
+"@spark-engine/event@>= 1.9 < 2":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@spark-engine/event/-/event-1.11.0.tgz#5508fd3f95b5690ab42e0ba6c31ef13bd0983419"
   integrity sha512-+1IBSQ+LBirJ8uGSg5vYnbd0aGbWqcc6F4PLKTek7RqI9En8+I05YjQNc9R7lMeivHRimJfyKRqbfhy5F8/OjA==
