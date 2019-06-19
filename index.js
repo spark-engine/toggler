@@ -188,7 +188,7 @@ function show(el) {
   }
   el.classList.remove( hiddenClass, hidingClass )
 
-  var fullyShow = function() {
+  var showInstantly = function() {
     // Remove hidden because it might be added before this fires
     el.classList.remove( showingClass, hiddenClass )
     el.classList.add( visibleClass )
@@ -207,10 +207,10 @@ function show(el) {
   }
 
   if ( el.dataset.animate ) {
-    Event.afterAnimation( el, fullyShow, true)
+    Event.afterAnimation( el, showInstantly, true)
     el.classList.add( showingClass )
   } else {
-    fullyShow()
+    showInstantly()
   }
 }
 
@@ -223,7 +223,7 @@ function hide(el) {
   // Remove showing because it might be added before this fires
   el.classList.remove( visibleClass, showingClass )
 
-  var fullyHide = function() {
+  var hideInstantly = function() {
     el.classList.remove( hidingClass, visibleClass )
     el.classList.add( hiddenClass )
 
@@ -234,10 +234,10 @@ function hide(el) {
   }
 
   if ( el.dataset.animate ) {
-    Event.afterAnimation( el, fullyHide, true)
+    Event.afterAnimation( el, hideInstantly, true)
     el.classList.add( hidingClass )
   } else {
-    fullyHide()
+    hideInstantly()
   }
 }
 

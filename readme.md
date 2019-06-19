@@ -1,4 +1,4 @@
-# Toggler
+# Spark Toggler
 
 [![Build Status](http://img.shields.io/travis/spark-engine/toggler.svg?style=flat-square)](https://travis-ci.org/spark-engine/toggler)
 
@@ -140,4 +140,3 @@ added to or removed from the select element. You might do this if you want to st
 
 For example, when the first option is chosen, the seelct will have the classname `cats` added and elements matching `.some-div` will have the classname `cats` added too. If either of these had
 the classnames `dogs` or `fish` those would be removed.
-
