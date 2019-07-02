@@ -8,6 +8,5 @@ describe("setClass for Toggler", () => {
   it("toggles on click data-toggle", async() => {
     await page.reload()
     await utils.click("#toggler")
-    await expect(page).toMatchElement(".is-hidden")
   })
 })

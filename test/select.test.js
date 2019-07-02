@@ -5,7 +5,7 @@ describe("select toggler", () => {
     await utils.goto("select.html")
   })
 
-  it("initializes with hidden elements matching cheked state", async() => {
+  it("initializes with hidden elements matching checked state", async() => {
     await expect(await utils.getProperty('#select-toggle', 'selectedIndex')).toBe(2)
     await expect(await utils.isVisible('#panel-one')).toBe(false)
     await expect(await utils.isVisible('#panel-two')).toBe(true)

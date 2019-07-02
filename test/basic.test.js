@@ -1,6 +1,6 @@
 const utils = require("./_utils.js")
 
-describe("click Toggler", () => {
+describe("basic click Toggler", () => {
   beforeAll( async () => {
     await utils.goto("basic.html")
   })

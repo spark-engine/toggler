@@ -5,7 +5,9 @@ var Event            = require('@spark-engine/event'),
     visibleClass     = 'visible',
     checkboxSelector = "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
     radioSelector    = "input[type=radio][data-show], input[type=radio][data-hide], input[type=radio][data-add-class], input[type=radio][data-remove-class]",
-    selectSelector   = "option[data-hide], option[data-show]"
+    selectSelector   = "option[data-hide], option[data-show]",
+    tabListSelector  = "[role=tablist][data-tab-toggle]",
+    tabSelector      = "[role=tab]"
 
 function listen(){
   Event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", trigger)
@@ -14,20 +16,22 @@ function listen(){
 }
 
 function hashChange() {
-  if ( window.location.hash ) {
+  if (window.location.hash) {
 
     var anchor = '[data-anchor="'+window.location.hash+'"]'
-    var target = document.querySelector( 'input'+anchor+ ', option'+anchor )
+    var target = document.querySelector(anchor)
 
-    if ( target ) {
-      if ( target.type == 'radio' ) {
+    if (target) {
+      if (target.type == 'radio') {
         target.checked = true
-      } else {
+      } else if (target.getAttribute('role') == 'tab') {
+        selectTab(target)
+      } else if (target.tagName == "OPTION") {
         var select = getSelectFromOption(target)
         select.selectedIndex = target.index
         target = select
       }
-      triggerToggling( target )
+      triggerToggling(target)
     }
   }
 }
@@ -36,6 +40,7 @@ function refresh(){
   toggleCheckboxes()
   setupSelects()
   setupRadios()
+  setupTabs()
 }
 
 function trigger(event) {
@@ -59,6 +64,10 @@ function triggerToggling(target, event) {
     target = select.selectedOptions[0]
   }
 
+  if (target.getAttribute('role') == 'tab') {
+    selectTab(target)
+  }
+
   // Radio inputs and selects do not support toggling, so remove them
   actions = actions.filter(function(action) {
     if (select || target.type == 'radio') {
@@ -68,8 +77,8 @@ function triggerToggling(target, event) {
   })
 
   // Dispatch all actions
-  actions.forEach( function( action ) {
-    dispatch( target, action )
+  actions.forEach(function(action) {
+    dispatch(target, action)
   })
 }
 
@@ -157,20 +166,20 @@ function setState(selectors, state) {
     var action = toggleAction(match, state)
 
     if (action == 'show') show(match)
-    else if (action == "hide" ) hide(match)
+    else if (action == "hide") hide(match)
 
     triggerTogglerEventsOnChildren(match, action)
   })
 }
 
-function toggleAction( el, action ) {
+function toggleAction(el, action) {
 
-  if ( typeof action == 'boolean' ) {
-    action = ( action ? 'show' : 'hide' )
+  if (typeof action == 'boolean') {
+    action = (action ? 'show' : 'hide')
   }
 
   if (action == 'toggle') {
-    if ( el.classList.contains(hiddenClass) || el.classList.contains(hidingClass) ) {
+    if (el.classList.contains(hiddenClass) || el.classList.contains(hidingClass)) {
       action = 'show'
     } else {
       action = 'hide'
@@ -181,20 +190,21 @@ function toggleAction( el, action ) {
 }
 
 function show(el) {
-  if ( el.classList.contains( visibleClass ) ||
-       el.classList.contains( showingClass ) ||
-       el.offsetParent != null ) {
+  if (el.classList.contains(visibleClass) ||
+       el.classList.contains(showingClass) ||
+       el.offsetParent != null) {
     return
   }
-  el.classList.remove( hiddenClass, hidingClass )
+  el.classList.remove(hiddenClass, hidingClass)
+  el.hidden = false
 
-  var showInstantly = function() {
+  var showNow = function() {
     // Remove hidden because it might be added before this fires
-    el.classList.remove( showingClass, hiddenClass )
-    el.classList.add( visibleClass )
+    el.classList.remove(showingClass, hiddenClass)
+    el.classList.add(visibleClass)
 
     // Enable inputs, fieldsets or forms when shown
-    if ( typeof el.disabled != 'undefined' ){
+    if (typeof el.disabled != 'undefined'){
       el.disabled = false
     }
 
@@ -206,38 +216,39 @@ function show(el) {
     var ranges = el.querySelectorAll('[type=range]')
   }
 
-  if ( el.dataset.animate ) {
-    Event.afterAnimation( el, showInstantly, true)
-    el.classList.add( showingClass )
+  if (el.dataset.animate) {
+    Event.afterAnimation(el, showNow, true)
+    el.classList.add(showingClass)
   } else {
-    showInstantly()
+    showNow()
   }
 }
 
 function hide(el) {
-  if ( el.classList.contains( hiddenClass ) ||
-       el.classList.contains( hidingClass ) ) {
+  if (el.classList.contains(hiddenClass) ||
+       el.classList.contains(hidingClass)) {
     return
   }
 
   // Remove showing because it might be added before this fires
-  el.classList.remove( visibleClass, showingClass )
+  el.classList.remove(visibleClass, showingClass)
 
-  var hideInstantly = function() {
-    el.classList.remove( hidingClass, visibleClass )
-    el.classList.add( hiddenClass )
+  var hideNow = function() {
+    el.classList.remove(hidingClass, visibleClass)
+    el.classList.add(hiddenClass)
+    el.hidden = true
 
     // Disable inputs, fieldsets or forms when hidden
-    if ( typeof el.disabled != 'undefined' ){
+    if (typeof el.disabled != 'undefined'){
       el.disabled = true
     }
   }
 
-  if ( el.dataset.animate ) {
-    Event.afterAnimation( el, hideInstantly, true)
-    el.classList.add( hidingClass )
+  if (el.dataset.animate) {
+    Event.afterAnimation(el, hideNow, true)
+    el.classList.add(hidingClass)
   } else {
-    hideInstantly()
+    hideNow()
   }
 }
 
@@ -275,8 +286,8 @@ function setupRadios() {
 
       var radioName         = radio.getAttribute('name'),
           siblings          = parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]'),
-          showSelectors     = dataAttributes(siblings, 'show'),
-          addClassSelectors = dataAttributes(siblings, 'addClass'),
+          showSelectors     = groupAttributes(siblings, 'data-show'),
+          addClassSelectors = groupAttributes(siblings, 'data-add-class'),
           checked
 
       Array.prototype.forEach.call(siblings, function(r){
@@ -287,42 +298,40 @@ function setupRadios() {
 
         // Ensure that all radio buttons in a group have a default data-show value of ''
         // This means that unset data-show values will toggle off everything
-        //
         r.dataset.show = r.dataset.show || ''
         r.dataset.addClass = r.dataset.addClass || ''
 
         // Append element's data-hide to showSelectors
-        if ( r.dataset.hide && r.dataset.hide.length > 0 )
-          showSelectors = showSelectors.concat( r.dataset.hide.split( ',' ) )
+        if (r.dataset.hide && r.dataset.hide.length > 0)
+          showSelectors = showSelectors.concat(r.dataset.hide.split(','))
 
         r.dataset.hide = showSelectors.filter(function(selector){
-          return r.dataset.show.indexOf( selector )
+          return r.dataset.show.indexOf(selector)
         }).join(',')
 
         // Ensure that all radio buttons in a group have a default data-add-class value of ''
         // This means that unset data-add-class values are toggle off all classes
-        //
         r.dataset.addClass = r.dataset.addClass || ''
 
         // Ensure that selected radio buttons remove classes according
         // to the deselected radio buttons
         r.dataset.removeClass = addClassSelectors.filter(function(selector){
-          return r.dataset.addClass.indexOf( selector )
+          return r.dataset.addClass.indexOf(selector)
         }).join('&')
 
 
         r.dataset.togglerActive = true
 
 
-        if( r.checked ) checked = r
+        if(r.checked) checked = r
 
       })
 
-      if ( checked ) {
-        triggerToggling( checked )
+      if (checked) {
+        triggerToggling(checked)
       } else {
-        setState( showSelectors.join(','), 'hide' )
-        setClass( addClassSelectors.join(' & '), 'removeClass' )
+        setState(showSelectors.join(','), 'hide')
+        setClass(addClassSelectors.join(' & '), 'removeClass')
       }
     }
 
@@ -331,7 +340,6 @@ function setupRadios() {
 
 // Add data-hide to each <option> containing the selectors from other
 // option's data-show. This makes the toggling of elements exclusive.
-//
 function setupSelects(){
   Array.prototype.forEach.call(document.querySelectorAll(selectSelector), function(option){
     // Prevent an option from being considered twice
@@ -343,8 +351,8 @@ function setupSelects(){
       select.dataset.selectToggler = true
       var options = select.querySelectorAll('option')
 
-      var showSelectors     = dataAttributes(options, 'show')
-      var addClassSelectors = dataAttributes(options, 'addClass')
+      var showSelectors     = groupAttributes(options, 'data-show')
+      var addClassSelectors = groupAttributes(options, 'data-add-class')
 
       Array.prototype.forEach.call(options, function(o, index) {
 
@@ -356,44 +364,72 @@ function setupSelects(){
         o.dataset.addClass = o.dataset.addClass || ''
 
         // Append element's data-hide to showSelectors
-        if ( o.dataset.hide && o.dataset.hide.length > 0 )
-          showSelectors = showSelectors.concat( o.dataset.hide.split( ',' ) )
+        if (o.dataset.hide && o.dataset.hide.length > 0)
+          showSelectors = showSelectors.concat(o.dataset.hide.split(','))
 
         // If show selectors are not present in element's data-show
         // Add them to the list of selectors to be hidden
         o.dataset.hide = showSelectors.filter(function(selector){
-          return o.dataset.show.indexOf( selector )
+          return o.dataset.show.indexOf(selector)
         }).join(',')
 
         o.dataset.removeClass = addClassSelectors.filter(function(selector){
-          return o.dataset.addClass.indexOf( selector )
+          return o.dataset.addClass.indexOf(selector)
         }).join(' & ')
 
         o.dataset.togglerActive = true
       })
 
       // Ensure that currently selected option is toggled properly
-      //
       triggerToggling(select)
     }
   })
 }
 
-// Find parent <select> for an option (accounts for option groups)
-//
-function getSelectFromOption(el) {
-  var p = el.parentElement
+function setupTabs() {
+  Array.prototype.forEach.call(document.querySelectorAll(tabListSelector), function(tabList) {
+    var tabs = tabList.querySelectorAll(tabSelector)
+    if (tabs.length == 0) return
 
-  if (p.tagName == 'SELECT') {
-    return p
-  } else {
-    return getSelectFromOption(p)
+    var showSelectors = groupAttributes(tabs, "aria-controls")
+
+    Array.prototype.forEach.call(tabs, function(tab) {
+      tab.dataset.show = "#"+tab.getAttribute('aria-controls')
+      tab.dataset.hide = showSelectors.filter(function(selector){
+        return tab.dataset.show.indexOf('#'+selector)
+      }).map(function(selector){ return '#'+selector }).join(',')
+    })
+
+    var selectedTab = tabList.querySelector('[data-anchor="'+window.location.hash+'"], [aria-selected=true]') || tabList.querySelectorAll(tabSelector)[0]
+
+    selectTab(selectedTab)
+    triggerToggling(selectedTab)
+  })
+}
+
+function selectTab(tab) {
+  var tabList = tab.closest(tabListSelector)
+  Array.prototype.forEach.call(tabList.querySelectorAll(tabSelector), function(t) {
+    if (t != tab) t.setAttribute('aria-selected', 'false')
+  })
+
+  // No need to run if the current tab is already selected
+  if (tab.getAttribute('aria-selected') === 'true') { return }
+
+  tab.setAttribute('aria-selected', true)
+
+  if (tab.dataset.anchor && window.location.hash != tab.dataset.anchor) {
+    window.location.hash = tab.dataset.anchor 
   }
+}
+
+// Find parent <select> for an option (accounts for option groups)
+function getSelectFromOption(el) {
+  return el.closest('select')
 }
 
 
 // Find parent <form> or document if there is no form
-//
 function parentForm(element) {
   var el = element
 
@@ -405,12 +441,12 @@ function parentForm(element) {
 }
 
 // Return a unique array of all data attribute values from elements
-//
-function dataAttributes(elements, attr) {
+function groupAttributes(elements, attr) {
   return Array.prototype.map.call(elements, function(el) {
-    return el.dataset[attr]
+    return el.getAttribute(attr)
   }).filter(function(selectors, index, self) {
-    return selectors != "" && typeof selectors != 'undefined' && self.indexOf(selectors) === index
+    // Only keep array items if they are truthy and not duplicates.
+    return selectors != "" && selectors != null && typeof selectors != 'undefined' && self.indexOf(selectors) === index
   })
 }
 
