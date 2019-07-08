@@ -5,7 +5,7 @@ var Event            = require('@spark-engine/event'),
     visibleClass     = 'visible',
     checkboxSelector = "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
     radioSelector    = "input[type=radio][data-show], input[type=radio][data-hide], input[type=radio][data-add-class], input[type=radio][data-remove-class]",
-    selectSelector   = "option[data-hide], option[data-show]",
+    optionSelector   = "option[data-hide], option[data-show]",
     tabListSelector  = "[role=tablist][data-tab-toggle]",
     tabSelector      = "[role=tab]"
 
@@ -24,19 +24,20 @@ function hashChange() {
     if (target) {
       if (target.type == 'radio') {
         target.checked = true
-      } else if (target.getAttribute('role') == 'tab') {
-        selectTab(target)
+      } else if (target.getAttribute('role') === 'tab') {
+        // No need to run if the current tab is already selected
+        if (target.getAttribute('aria-selected') === 'true') { return }
       } else if (target.tagName == "OPTION") {
-        var select = getSelectFromOption(target)
-        select.selectedIndex = target.index
-        target = select
+        target.closest('select').selectedIndex = target.index
       }
+
       triggerToggling(target)
     }
   }
 }
 
 function refresh(){
+  selectByUrl()
   toggleCheckboxes()
   setupSelects()
   setupRadios()
@@ -55,22 +56,23 @@ function trigger(event) {
 
 function triggerToggling(target, event) {
   var actions = ['hide', 'toggle', 'show', 'removeClass', 'toggleClass', 'addClass']
-  var select
 
   // Store the select, and set the target to the current option
   // Events fire on the select, but the options have toggling attributes
   if (target.tagName.match(/select/i)) {
-    select = target
-    target = select.selectedOptions[0]
+    return triggerToggling(target.selectedOptions[0])
   }
 
   if (target.getAttribute('role') == 'tab') {
     selectTab(target)
+    selectAmongOthers(target)
+  } else if (target.tagName == 'OPTION' || target.type == 'radio') {
+    selectAmongOthers(target)
   }
 
-  // Radio inputs and selects do not support toggling, so remove them
+  // Radio inputs, tabs, and selects do not support toggling, so remove them
   actions = actions.filter(function(action) {
-    if (select || target.type == 'radio') {
+    if (target.tagName == 'OPTION' || target.type == 'radio' || target.getAttribute('role') == 'tab') {
       return !action.match(/toggle/)
     }
     return target.dataset[action] != null
@@ -281,57 +283,23 @@ function toggleCheckboxes(checkboxes) {
 }
 
 function setupRadios() {
-  Array.prototype.forEach.call(document.querySelectorAll(radioSelector), function(radio, index){
+  Array.prototype.forEach.call(document.querySelectorAll(radioSelector), function(radio){
     if (!radio.dataset.togglerActive) {
 
       var radioName         = radio.getAttribute('name'),
-          siblings          = parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]'),
-          showSelectors     = groupAttributes(siblings, 'data-show'),
-          addClassSelectors = groupAttributes(siblings, 'data-add-class'),
+          radios            = parentForm(radio).querySelectorAll('[type=radio][name="'+radioName+'"]'),
           checked
 
-      Array.prototype.forEach.call(siblings, function(r){
-
-        if (r.dataset.anchor && window.location.hash == ('#'+r.dataset.anchor.replace('#',''))) {
-          r.checked = true
-        }
-
-        // Ensure that all radio buttons in a group have a default data-show value of ''
-        // This means that unset data-show values will toggle off everything
-        r.dataset.show = r.dataset.show || ''
-        r.dataset.addClass = r.dataset.addClass || ''
-
-        // Append element's data-hide to showSelectors
-        if (r.dataset.hide && r.dataset.hide.length > 0)
-          showSelectors = showSelectors.concat(r.dataset.hide.split(','))
-
-        r.dataset.hide = showSelectors.filter(function(selector){
-          return r.dataset.show.indexOf(selector)
-        }).join(',')
-
-        // Ensure that all radio buttons in a group have a default data-add-class value of ''
-        // This means that unset data-add-class values are toggle off all classes
-        r.dataset.addClass = r.dataset.addClass || ''
-
-        // Ensure that selected radio buttons remove classes according
-        // to the deselected radio buttons
-        r.dataset.removeClass = addClassSelectors.filter(function(selector){
-          return r.dataset.addClass.indexOf(selector)
-        }).join('&')
-
-
+      Array.prototype.forEach.call(radios, function(r){
         r.dataset.togglerActive = true
-
-
         if(r.checked) checked = r
-
       })
 
-      if (checked) {
-        triggerToggling(checked)
+      if (checked) { 
+        triggerToggling(checked) 
       } else {
-        setState(showSelectors.join(','), 'hide')
-        setClass(addClassSelectors.join(' & '), 'removeClass')
+        hideOthers(radios)
+        removeClassOnOthers(radios)
       }
     }
 
@@ -341,46 +309,12 @@ function setupRadios() {
 // Add data-hide to each <option> containing the selectors from other
 // option's data-show. This makes the toggling of elements exclusive.
 function setupSelects(){
-  Array.prototype.forEach.call(document.querySelectorAll(selectSelector), function(option){
-    // Prevent an option from being considered twice
-    if (!option.dataset.togglerActive) {
+  Array.prototype.forEach.call(document.querySelectorAll(optionSelector), function(option){
+    var select = option.closest('select')
 
-      option.dataset.show = option.dataset.show || ''
-
-      var select = getSelectFromOption(option)
+    // Mark selects to prevent double processing for each option.
+    if (!select.dataset.selectToggler) { 
       select.dataset.selectToggler = true
-      var options = select.querySelectorAll('option')
-
-      var showSelectors     = groupAttributes(options, 'data-show')
-      var addClassSelectors = groupAttributes(options, 'data-add-class')
-
-      Array.prototype.forEach.call(options, function(o, index) {
-
-        if (o.dataset.anchor && window.location.hash == ('#'+o.dataset.anchor.replace('#',''))) {
-          select.selectedIndex = index
-        }
-
-        o.dataset.show = o.dataset.show || ''
-        o.dataset.addClass = o.dataset.addClass || ''
-
-        // Append element's data-hide to showSelectors
-        if (o.dataset.hide && o.dataset.hide.length > 0)
-          showSelectors = showSelectors.concat(o.dataset.hide.split(','))
-
-        // If show selectors are not present in element's data-show
-        // Add them to the list of selectors to be hidden
-        o.dataset.hide = showSelectors.filter(function(selector){
-          return o.dataset.show.indexOf(selector)
-        }).join(',')
-
-        o.dataset.removeClass = addClassSelectors.filter(function(selector){
-          return o.dataset.addClass.indexOf(selector)
-        }).join(' & ')
-
-        o.dataset.togglerActive = true
-      })
-
-      // Ensure that currently selected option is toggled properly
       triggerToggling(select)
     }
   })
@@ -391,29 +325,70 @@ function setupTabs() {
     var tabs = tabList.querySelectorAll(tabSelector)
     if (tabs.length == 0) return
 
-    var showSelectors = groupAttributes(tabs, "aria-controls")
-
     Array.prototype.forEach.call(tabs, function(tab) {
       tab.dataset.show = "#"+tab.getAttribute('aria-controls')
-      tab.dataset.hide = showSelectors.filter(function(selector){
-        return tab.dataset.show.indexOf('#'+selector)
-      }).map(function(selector){ return '#'+selector }).join(',')
     })
 
     var selectedTab = tabList.querySelector('[data-anchor="'+window.location.hash+'"], [aria-selected=true]') || tabList.querySelectorAll(tabSelector)[0]
 
-    selectTab(selectedTab)
     triggerToggling(selectedTab)
   })
 }
 
-function selectTab(tab) {
-  var tabList = tab.closest(tabListSelector)
-  Array.prototype.forEach.call(tabList.querySelectorAll(tabSelector), function(t) {
-    if (t != tab) t.setAttribute('aria-selected', 'false')
-  })
+function getSiblingEls(el) {
+  var elements
 
-  // No need to run if the current tab is already selected
+  if (el.type == 'radio') {
+    elements = parentForm(el).querySelectorAll('[type=radio][name="'+el.getAttribute('name')+'"]')
+  } else if (el.getAttribute('role') == 'tab') {
+    elements = el.closest(tabListSelector).querySelectorAll(tabSelector)
+  } else if (el.tagName == "OPTION") {
+    elements = el.closest('select').querySelectorAll('option')
+  }
+
+  return Array.prototype.filter.call(elements, function(e) { return e != el })
+}
+
+function hideOthers(others, el) {
+  var hideSelectors = showAttributes(others)
+  if (el) {
+    var showSelectors = (el.dataset.show || '').split(',')
+    hideSelectors = hideSelectors.filter(function(selector) {
+      return showSelectors.indexOf(selector) < 0
+    })
+  }
+
+  setState(hideSelectors.join(','), 'hide')
+}
+
+function removeClassOnOthers(others) {
+  Array.prototype.forEach.call(others, function(other) {
+    setClass(other.dataset.addClass, 'remove', other)
+  })
+}
+
+function selectByUrl() {
+  if (window.location.hash.length < 1) { return }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-anchor="'+window.location.hash+'"]'), function(el) {
+    if (el.tagName == 'OPTION') {
+      el.closest('select').selectedIndex = el.index 
+    } else if (el.getAttribute('role') == 'tab') { 
+      el.setAttribute('aria-selected', 'true')
+    } else if (el.type == 'radio') {
+      el.checked = true
+    }
+  })
+}
+
+function selectTab(tab) {
+  var siblings = getSiblingEls(tab)
+
+  Array.prototype.forEach.call(siblings, function(t) {
+    t.setAttribute('aria-selected', 'false')
+  })
+  
+  // Don't set selected and change url if the current tab is already selected
   if (tab.getAttribute('aria-selected') === 'true') { return }
 
   tab.setAttribute('aria-selected', true)
@@ -421,6 +396,13 @@ function selectTab(tab) {
   if (tab.dataset.anchor && window.location.hash != tab.dataset.anchor) {
     window.location.hash = tab.dataset.anchor 
   }
+}
+
+function selectAmongOthers(el) {
+  var siblings = getSiblingEls(el)
+
+  hideOthers(siblings, el)
+  removeClassOnOthers(siblings)
 }
 
 // Find parent <select> for an option (accounts for option groups)
@@ -440,11 +422,20 @@ function parentForm(element) {
   return el || document
 }
 
-// Return a unique array of all data attribute values from elements
 function groupAttributes(elements, attr) {
   return Array.prototype.map.call(elements, function(el) {
     return el.getAttribute(attr)
   }).filter(function(selectors, index, self) {
+    // Only keep array items if they are truthy and not duplicates.
+    return selectors != "" && selectors != null && typeof selectors != 'undefined' && self.indexOf(selectors) === index
+  })
+}
+
+// Return a unique array of all data attribute values from elements
+function showAttributes(elements) {
+  return Array.prototype.map.call(elements, function(el) {
+    return el.dataset.show
+  }).join(',').split(',').filter(function(selectors, index, self) {
     // Only keep array items if they are truthy and not duplicates.
     return selectors != "" && selectors != null && typeof selectors != 'undefined' && self.indexOf(selectors) === index
   })

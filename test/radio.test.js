@@ -50,7 +50,7 @@ describe("radio toggler", () => {
 
   it("should remove classnames one,two,three when none is selected", async() => {
     await utils.click("#none")
-    await expect(page).not.toMatchElement("#panels.one, #panels.two, #panels.three")
+    await expect(page).toMatchElement("#panels:not(.one), #panels:not(.two), #panels:not(.three)")
   })
 
   it("should add only classname one when one is selected", async() => {
