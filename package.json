@@ -1,6 +1,6 @@
 {
   "name": "@spark-engine/toggler",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Easily toggle elements visibility or classnames from click or change events",
   "main": "index.js",
   "scripts": {
