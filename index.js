@@ -329,7 +329,9 @@ function setupTabs() {
       tab.dataset.show = "#"+tab.getAttribute('aria-controls')
     })
 
-    var selectedTab = tabList.querySelector('[data-anchor="'+window.location.hash+'"], [aria-selected=true]') || tabList.querySelectorAll(tabSelector)[0]
+    var selectedTab = tabList.querySelector('[data-anchor="'+window.location.hash+'"]') ||
+                      tabList.querySelector('[aria-selected=true]') ||
+                      tabList.querySelectorAll(tabSelector)[0]
 
     triggerToggling(selectedTab)
   })

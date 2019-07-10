@@ -40,6 +40,7 @@ describe("tab Toggler", () => {
 
   it("changes selected tab with window.location.hash changes", async() => {
     await utils.goto("tab.html#tab2")
+    await page.reload()
     await expect(await utils.getAttr('#tab-1', 'aria-selected')).toBe(false)
     await expect(await utils.getAttr('#tab-2', 'aria-selected')).toBe(true)
 
