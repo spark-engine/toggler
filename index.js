@@ -1,8 +1,8 @@
-var Event            = require('@spark-engine/event'),
-    hiddenClass      = 'hidden',
-    hidingClass      = 'hiding',
-    showingClass     = 'showing',
-    visibleClass     = 'visible',
+var Event            = require("@spark-engine/event"),
+    hiddenClass      = "hidden",
+    hidingClass      = "hiding",
+    showingClass     = "showing",
+    visibleClass     = "visible",
     checkboxSelector = "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
     radioSelector    = "input[type=radio][data-show], input[type=radio][data-hide], input[type=radio][data-add-class], input[type=radio][data-remove-class]",
     optionSelector   = "option[data-hide], option[data-show]",
@@ -382,24 +382,25 @@ function selectByUrl() {
 }
 
 function selectTab(tab) {
-  var siblings = getSiblingEls(tab)
-
-  Array.prototype.forEach.call(siblings, function(t) {
+  // Deselect sibling tabs
+  Array.prototype.forEach.call(getSiblingEls(tab), function(t) {
     t.setAttribute('aria-selected', 'false')
   })
   
   // Don't set selected and change url if the current tab is already selected
-  if (tab.getAttribute('aria-selected') === 'true') { return }
+  if (tab.getAttribute('aria-selected') !== 'true') {
 
-  tab.setAttribute('aria-selected', true)
+    tab.setAttribute('aria-selected', true)
 
-  if (tab.dataset.anchor && window.location.hash != tab.dataset.anchor) {
-    window.location.hash = tab.dataset.anchor 
+    if (tab.dataset.anchor && window.location.hash != tab.dataset.anchor) {
+      window.location.hash = tab.dataset.anchor 
+    }
   }
 }
 
 function selectAmongOthers(el) {
   var siblings = getSiblingEls(el)
+  if (siblings.length < 1) { return }
 
   hideOthers(siblings, el)
   removeClassOnOthers(siblings)
