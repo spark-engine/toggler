@@ -39,7 +39,7 @@ function hashChange() {
   } else if (lastHash) {
     // If a previous tab was selected and a user navigates back, changing the location hash to ''
     // Select the first tab which is the default
-    var tab = document.querySelector(lastHashAnchor + tabSelector)
+    var tab = document.querySelector(lastHash + tabSelector)
     if (tab) {
       var firstTab = tab.closest(tabListSelector).querySelector(tabSelector)
       firstTab.setAttribute('aria-selected', 'true')
