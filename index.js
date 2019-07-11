@@ -7,7 +7,8 @@ var Event            = require("@spark-engine/event"),
     radioSelector    = "input[type=radio][data-show], input[type=radio][data-hide], input[type=radio][data-add-class], input[type=radio][data-remove-class]",
     optionSelector   = "option[data-hide], option[data-show]",
     tabListSelector  = "[role=tablist][data-tab-toggle]",
-    tabSelector      = "[role=tab]"
+    tabSelector      = "[role=tab]",
+    lastHash         = ""
 
 function listen(){
   Event.on(document, "click change", "[data-toggle], [data-show], [data-hide], [data-toggle-class], [data-add-class], [data-remove-class]", trigger)
@@ -22,6 +23,8 @@ function hashChange() {
     var target = document.querySelector(anchor)
 
     if (target) {
+      lastHash = anchor
+
       if (target.type == 'radio') {
         target.checked = true
       } else if (target.getAttribute('role') === 'tab') {
@@ -32,6 +35,15 @@ function hashChange() {
       }
 
       triggerToggling(target)
+    }
+  } else if (lastHash) {
+    // If a previous tab was selected and a user navigates back, changing the location hash to ''
+    // Select the first tab which is the default
+    var tab = document.querySelector(lastHashAnchor + tabSelector)
+    if (tab) {
+      var firstTab = tab.closest(tabListSelector).querySelector(tabSelector)
+      firstTab.setAttribute('aria-selected', 'true')
+      triggerToggling(firstTab)
     }
   }
 }
