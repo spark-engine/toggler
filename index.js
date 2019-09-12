@@ -6,7 +6,7 @@ var Event            = require("@spark-engine/event"),
     checkboxSelector = "[type=checkbox][data-toggle], [type=checkbox][data-show], [type=checkbox][data-hide]",
     radioSelector    = "input[type=radio][data-show], input[type=radio][data-hide], input[type=radio][data-add-class], input[type=radio][data-remove-class]",
     optionSelector   = "option[data-hide], option[data-show]",
-    tabListSelector  = "[role=tablist][data-tab-toggle]",
+    tabListSelector  = "[role=tablist]",
     tabSelector      = "[role=tab]",
     lastHash         = ""
 
@@ -307,8 +307,8 @@ function setupRadios() {
         if(r.checked) checked = r
       })
 
-      if (checked) { 
-        triggerToggling(checked) 
+      if (checked) {
+        triggerToggling(checked)
       } else {
         hideOthers(radios)
         removeClassOnOthers(radios)
@@ -325,7 +325,7 @@ function setupSelects(){
     var select = option.closest('select')
 
     // Mark selects to prevent double processing for each option.
-    if (!select.dataset.selectToggler) { 
+    if (!select.dataset.selectToggler) {
       select.dataset.selectToggler = true
       triggerToggling(select)
     }
@@ -338,7 +338,8 @@ function setupTabs() {
     if (tabs.length == 0) return
 
     Array.prototype.forEach.call(tabs, function(tab) {
-      tab.dataset.show = "#"+tab.getAttribute('aria-controls')
+      var controls = tab.getAttribute('aria-controls')
+      if(controls) tab.dataset.show = "#"+controls
     })
 
     var selectedTab = tabList.querySelector('[data-anchor="'+window.location.hash+'"]') ||
@@ -386,8 +387,8 @@ function selectByUrl() {
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-anchor="'+window.location.hash+'"]'), function(el) {
     if (el.tagName == 'OPTION') {
-      el.closest('select').selectedIndex = el.index 
-    } else if (el.getAttribute('role') == 'tab') { 
+      el.closest('select').selectedIndex = el.index
+    } else if (el.getAttribute('role') == 'tab') {
       el.setAttribute('aria-selected', 'true')
     } else if (el.type == 'radio') {
       el.checked = true
@@ -400,14 +401,14 @@ function selectTab(tab) {
   Array.prototype.forEach.call(getSiblingEls(tab), function(t) {
     t.setAttribute('aria-selected', 'false')
   })
-  
+
   // Don't set selected and change url if the current tab is already selected
   if (tab.getAttribute('aria-selected') !== 'true') {
 
     tab.setAttribute('aria-selected', true)
 
     if (tab.dataset.anchor && window.location.hash != tab.dataset.anchor) {
-      window.location.hash = tab.dataset.anchor 
+      window.location.hash = tab.dataset.anchor
     }
   }
 }
