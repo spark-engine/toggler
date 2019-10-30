@@ -225,9 +225,6 @@ function show(el) {
     // Focus on key element if an element expects focus
     var focusEl = el.querySelector('[data-focus]')
     if (focusEl) { focusEl.focus() }
-
-    // Trigger input event on ranges that have been hidden
-    var ranges = el.querySelectorAll('[type=range]')
   }
 
   if (el.dataset.animate) {
@@ -436,15 +433,6 @@ function parentForm(element) {
   }
 
   return el || document
-}
-
-function groupAttributes(elements, attr) {
-  return Array.prototype.map.call(elements, function(el) {
-    return el.getAttribute(attr)
-  }).filter(function(selectors, index, self) {
-    // Only keep array items if they are truthy and not duplicates.
-    return selectors != "" && selectors != null && typeof selectors != 'undefined' && self.indexOf(selectors) === index
-  })
 }
 
 // Return a unique array of all data attribute values from elements
